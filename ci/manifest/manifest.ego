@@ -1,0 +1,250 @@
+<%! func ManifestTmpl(w io.Writer, config Config) error %>
+<%% import . "github.com/compozed/travel-agent/models" %%>
+---
+# ci/manifest/manifest.ego
+#
+# Travel agent manifest template to deploy pivotal ops manager tiles to
+# multiple environments
+#
+# DO NOT MAKE CHANGES TO THIS FILE. Instead modify
+# the travel-agent.yml or settings.yml file for this pipeline.
+#
+# Author:
+#   Alan Moran;  bonzofenix@gmail.com
+#   Anand Gopal; pegangandkumar@gmail.com
+#   Joe Goller;  joe.goller@gmail.com
+
+meta:
+  pipeline:
+    uri: https://github.com/bonzofenix/tile-ta-deployment
+
+<% for _, env := range config.Envs { %>
+  <%= env.Name %>_upgrade_dependencies: &<%= env.Name %>_upgrade_dependencies
+    <% if env.HasDependencies() { %>
+    passed:
+      <% for _, dependency := range env.DependsOn { %>
+      - <%= dependency %>-upgrade
+      <% } %>
+    <% } else { %>
+    passed: []
+    <% } %>
+
+  <%= env.Name %>_update_dependencies: &<%= env.Name %>_update_dependencies
+    <% if env.HasDependencies() { %>
+    passed:
+      <% for _, dependency := range env.DependsOn { %>
+      - <%= dependency %>-update
+      <% } %>
+    <% } else { %>
+    passed: []
+    <% } %>
+
+  <%= env.Name %>_om_params: &<%= env.Name %>_om_params
+    OM_TARGET:                   ((grab meta.<%= env.Name %>.om_target))
+    OM_CLIENT_ID:                ((grab meta.<%= env.Name %>.om_client_id || ""))
+    OM_CLIENT_SECRET:            ((grab meta.<%= env.Name %>.om_client_secret || ""))
+    OM_USERNAME:                 ((grab meta.<%= env.Name %>.om_username))
+    OM_PASSWORD:                 ((grab meta.<%= env.Name %>.om_password))
+    OM_SKIP_SSL_VALIDATION:      ((grab meta.<%= env.Name %>.om_skip_ssl_validation || false))
+    OM_TRACE:                    ((grab meta.<%= env.Name %>.om_trace || false))
+    DRY_RUN:                     ((grab meta.<%= env.Name %>.dry_run || false))
+    DEBUG:                       ((grab meta.<%= env.Name %>.debug || false))
+
+<% } %>
+  vault_params: &vault_params
+    VAULT_ADDR:          (( grab meta.vault.address ))
+    VAULT_TOKEN:         (( grab meta.vault.token ))
+    VAULT_SKIP_VERIFY:   (( grab meta.vault.skip_verify || true ))
+
+groups:
+- name: update
+  jobs:
+<% for _, env := range config.Envs { %>
+  - <%= env.Name %>-update
+<% } %>
+
+- name: upgrade
+  jobs:
+<% for _, env := range config.Envs { %>
+  - <%= env.Name %>-upgrade
+<% } %>
+
+- name: destroy
+  jobs:
+<% for _, env := range config.Envs { %>
+  <% if env.HasFeature("allow_destroy") { %>
+  - <%= env.Name %>-destroy
+  <% } %>
+<% } %>
+
+<% artifactoryStemcell := false %>
+
+jobs:
+<% for _, env := range config.Envs { %>
+- name: <%= env.Name %>-upgrade
+  serial: true
+  plan:
+  - aggregate:
+    - get: pipeline
+      <<: *<%= env.Name %>_upgrade_dependencies
+    - get: product
+      params:
+        globs: [ (( grab meta.glob || "*.pivotal" )) ]
+      <<: *<%= env.Name %>_upgrade_dependencies
+    - get: config
+      resource: <%= env.Name %>-config
+    - get: metadata
+    - put: lock
+      params:
+        claim: <%= env.Name %>
+  <% if env.HasFeature("artifactory_stemcell") { %>
+  <% artifactoryStemcell = true %>
+    - get: stemcell
+  <% } else { %>
+  - task: stemcell
+    file: pipeline/ci/tasks/get-stemcell.yml
+    params:
+      IAAS:                        (( grab meta.iaas_type ))
+      PIVNET_API_TOKEN:            (( grab meta.pivnet_token ))
+      <<: *<%= env.Name %>_om_params
+  <% } %>
+  - task: upgrade
+    file: pipeline/ci/tasks/upgrade.yml
+    params:
+      <<: *<%= env.Name %>_om_params
+      <<: *vault_params
+      NETWORK_CONFIG:      (( grab meta.<%= env.Name %>.network_config ))
+      PROPERTIES_CONFIG:   (( grab meta.<%= env.Name %>.properties_config ))
+      RESOURCES_CONFIG:    (( grab meta.<%= env.Name %>.resources_config ))
+      ERRANDS_CONFIG:      (( grab meta.<%= env.Name %>.errands_config || "" ))
+      PRODUCT_NAME:        (( grab meta.product_name ))
+      REPLICATOR_NAME:     (( grab meta.replicator_name || "" ))
+      WINDOWS:             (( grab meta.windows || false ))
+      STORE_FILE:          (( grab meta.<%= env.Name %>.store_file ))
+      YAML2VAULT_PREFIX:   (( grab meta.<%= env.Name %>.yaml2vault_prefix ))
+  ensure: &<%= env.Name %>-ensure
+    put: config
+    resource: <%= env.Name %>-config
+    params:
+      repository: config-mod
+      rebase: true
+    on_success:
+      put: lock
+      params:
+        release: lock
+
+- name: <%= env.Name %>-update
+  serial: true
+  plan:
+  - aggregate:
+    - get: pipeline
+      <<: *<%= env.Name %>_update_dependencies
+    - get: config
+      resource: <%= env.Name %>-config
+    - get: metadata
+    - put: lock
+      params:
+        claim: <%= env.Name %>
+  - task: update
+    file: pipeline/ci/tasks/update.yml
+    params:
+      <<: *<%= env.Name %>_om_params
+      <<: *vault_params
+      NETWORK_CONFIG:      (( grab meta.<%= env.Name %>.network_config ))
+      PROPERTIES_CONFIG:   (( grab meta.<%= env.Name %>.properties_config ))
+      RESOURCES_CONFIG:    (( grab meta.<%= env.Name %>.resources_config ))
+      ERRANDS_CONFIG:      (( grab meta.<%= env.Name %>.errands_config || "" ))
+      PRODUCT_NAME:        (( grab meta.product_name ))
+      STORE_FILE:          (( grab meta.<%= env.Name %>.store_file ))
+      YAML2VAULT_PREFIX:   (( grab meta.<%= env.Name %>.yaml2vault_prefix ))
+  ensure:
+    <<: *<%= env.Name %>-ensure
+
+<% if env.HasFeature("allow_destroy") { %>
+- name: <%= env.Name %>-destroy
+  serial: true
+  plan:
+  - aggregate:
+    - get: pipeline
+    - put: lock
+      params:
+        claim: <%= env.Name %>
+  - task: destroy
+    file: pipeline/ci/tasks/destroy.yml
+    params:
+      <<: *<%= env.Name %>_om_params
+      PRODUCT_NAME:        (( grab meta.product_name ))
+  on_success:
+    put: lock
+    params:
+      release: lock
+<% } %>
+<% } %>
+
+resources:
+- name: product
+  type: pivnet
+  source:
+    api_token:    (( grab meta.pivnet_token ))
+    product_slug: (( grab meta.product_slug ))
+    product_version: (( grab meta.product_version_regex ))
+    sort_by: semver
+- name: pipeline
+  type: git
+  source:
+    branch:      (( grab meta.pipeline.branch || "master" ))
+    private_key: (( grab meta.pipeline.private_key  || nil ))
+    uri:         (( grab meta.pipeline.uri ))
+<% for _, env := range config.Envs { %>
+- name: <%= env.Name %>-config
+  type: git
+  source:
+    paths:
+    - default/<%= config.Name %>
+    - <%= env.Name %>/<%= config.Name %>
+    branch:      (( grab meta.deployments.branch || "master" ))
+    private_key: (( grab meta.deployments.private_key ))
+    uri:         (( grab meta.deployments.uri ))
+<% } %>
+
+- name: lock
+  type: pool
+  source:
+    uri:         (( grab meta.locks.uri ))
+    branch:      (( grab meta.locks.branch || "master" ))
+    private_key: (( grab meta.locks.private_key ))
+    pool:        (( grab meta.locks.pool ))
+
+- name: metadata
+  type: build-metadata
+
+<% if artifactoryStemcell { %>
+- name: stemcell
+  type: artifactory
+  source:
+    endpoint:         (( grab meta.artifactory.endpoint || "/" ))
+    repository:       (( grab meta.artifactory.repository || "" ))
+    regex:            (( grab meta.artifactory.regex || "*" ))
+    username:         (( grab meta.artifactory.username ))
+    password:         (( grab meta.artifactory.password ))
+<% } %>
+
+resource_types:
+- name: pivnet
+  type: docker-image
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
+
+- name: build-metadata
+  type: docker-image
+  source:
+    repository: mastertinner/build-metadata-resource
+
+<% if artifactoryStemcell { %>
+- name: artifactory
+  type: docker-image
+  source:
+    repository: pivotalservices/artifactory-resource
+    version: 0.1
+<% } %>

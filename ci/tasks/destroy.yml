@@ -1,0 +1,27 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bonzofenix/ci-tools
+    version: v0.1.6
+
+params:
+  DEBUG: false
+  OM_TARGET:
+  OM_CLIENT_ID:
+  OM_CLIENT_SECRET:
+  OM_USERNAME:
+  OM_PASSWORD:
+  OM_SKIP_SSL_VALIDATION: false
+  OM_REQUEST_TIMEOUT: 3600
+  PRODUCT_NAME:
+
+inputs:
+  - name: pipeline
+
+outputs:
+
+run:
+  path: pipeline/ci/scripts/destroy.sh

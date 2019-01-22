@@ -25,6 +25,14 @@ function log() {
   echo -e "${green}$1${reset}"
 }
 
+function load_custom_certs(){
+
+  echo "+++++++Root CA: $AON_ROOT_CA"
+  echo "+++++++Intermediate CA: $AON_INTERMEDIATE_CA"
+
+  # Implement it
+}
+
 function error() {
   red='\033[0;31m'
   reset='\033[0m'

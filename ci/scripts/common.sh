@@ -27,8 +27,11 @@ function log() {
 
 function load_custom_certs(){
 
-  echo "+++++++Root CA: $AON_ROOT_CA"
-  echo "+++++++Intermediate CA: $AON_INTERMEDIATE_CA"
+  echo "+++++++Root CA: $CUSTOM_ROOT_CA"
+  echo $CUSTOM_ROOT_CA > /etc/ssl/certs/custom_root_ca.crt
+  echo "+++++++Intermediate CA: $CUSTOM_INTERMEDIATE_CA"
+  echo $CUSTOM_INTERMEDIATE_CA > /etc/ssl/certs/custom_intermediate_ca.crt
+  update-ca-certificate
 
   # Implement it
 }

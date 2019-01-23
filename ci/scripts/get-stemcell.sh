@@ -98,7 +98,7 @@ function download_stemcell() {
         wget "https://s3.amazonaws.com/bosh-core-stemcells/${IAAS}/bosh-stemcell-${STEMCELL_VERSION}-${IAAS}-esxi-ubuntu-xenial-go_agent.tgz"
       popd >/dev/null
     else
-      pivnet-cli \
+      pivnet \
         login \
         --api-token="$PIVNET_API_TOKEN"
       pivnet-cli \

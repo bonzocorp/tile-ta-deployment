@@ -101,7 +101,7 @@ function download_stemcell() {
       pivnet \
         login \
         --api-token="$PIVNET_API_TOKEN"
-      pivnet-cli \
+      pivnet \
         download-product-files \
         -p "$product_slug" \
         -r $STEMCELL_VERSION \

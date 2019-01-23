@@ -210,9 +210,9 @@ resources:
     paths:
     - default/<%= config.Name %>
     - <%= env.Name %>/<%= config.Name %>
-    branch:      (( grab meta.deployments.branch || "master" ))
-    private_key: (( grab meta.deployments.private_key ))
-    uri:         (( grab meta.deployments.uri ))
+    branch:      (( grab meta.configs.branch || "master" ))
+    private_key: (( grab meta.configs.private_key ))
+    uri:         (( grab meta.configs.uri ))
 <% } %>
 
 - name: lock

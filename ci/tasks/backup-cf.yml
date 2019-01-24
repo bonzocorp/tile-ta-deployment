@@ -1,0 +1,25 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bonzofenix/ci-tools
+    version: v0.1.6
+
+params:
+  DEBUG:
+  BOSH_TARGET:
+  BOSH_CLIENT:
+  BOSH_CLIENT_SECRET:
+  BOSH_CA_CERT:
+  PAS_DEPLOYMENT_NAME:
+
+inputs:
+  - name: pipeline
+
+outputs:
+  - name: output
+
+run:
+  path: pipeline/ci/scripts/backup-cf.sh

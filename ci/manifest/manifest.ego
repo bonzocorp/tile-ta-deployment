@@ -77,6 +77,22 @@ groups:
   - <%= env.Name %>-upgrade
 <% } %>
 
+- name: backup
+  jobs:
+<% for _, env := range config.Envs { %>
+  <% if env.HasFeature("backup") { %>
+  - <%= env.Name %>-backup
+  <% } %>
+<% } %>
+
+- name: restore
+  jobs:
+<% for _, env := range config.Envs { %>
+  <% if env.HasFeature("restore") { %>
+  - <%= env.Name %>-restore
+  <% } %>
+<% } %>
+
 - name: destroy
   jobs:
 <% for _, env := range config.Envs { %>
@@ -116,6 +132,17 @@ jobs:
       PIVNET_API_TOKEN:            (( grab meta.pivnet_token ))
       <<: *<%= env.Name %>_deploy_params
   <% } %>
+
+  <% if env.HasFeature("backup") { %>
+  - task: backup-cf
+    file: pipeline/ci/tasks/backup-cf.yml
+    params:
+    on_success:
+      put: <%= env.Name %>-cf-s3-backup
+      params:
+        file: output/cf.tgz
+  <% } %>
+
   - task: upgrade
     file: pipeline/ci/tasks/upgrade.yml
     params:
@@ -187,6 +214,74 @@ jobs:
     params:
       release: lock
 <% } %>
+
+<% if env.HasFeature("backup") { %>
+- name: <%= env.Name %>-backup
+  serial: true
+  plan:
+  - aggregate:
+    - get: pipeline
+    <% if env.HasFeature("backup-daily") { %>
+    - trigger: true
+      get: every-day
+    <% } %>
+    - get: config
+      resource: <%= env.Name %>-config
+    - put: lock
+      params:
+        claim: <%= env.Name %>
+  - task: backup-cf
+    file: pipeline/ci/tasks/backup-cf.yml
+    on_success:
+      put: <%= env.Name %>-cf-s3-backup
+      params:
+        file: output/cf.tgz
+    params:
+      DEBUG:              (( grab meta.<%=env.Name %>.debug ))
+      BOSH_TARGET:        (( grab meta.<%=env.Name %>.cf.bosh_target ))
+      BOSH_CLIENT:        (( grab meta.<%=env.Name %>.cf.bosh_client ))
+      BOSH_CLIENT_SECRET: (( grab meta.<%=env.Name %>.cf.bosh_client_secret ))
+      BOSH_CA_CERT:       (( grab meta.<%=env.Name %>.cf.bosh_ca_cert ))
+      PAS_DEPLOYMENT_NAME: (( grab meta.<%=env.Name %>.cf.pas_deployment_name ))
+      BBR_USERNAME:       (( grab meta.<%= env.Name %>.cf.bbr_username ))
+      BBR_SSH_KEY:        (( grab meta.<%= env.Name %>.cf.bbr_ssh_key ))
+  ensure:
+    put: lock
+    params:
+      release: lock
+<% } %>
+
+<% if env.HasFeature("restore") { %>
+- name: <%= env.Name %>-restore
+  serial: true
+  plan:
+  - aggregate:
+    - get: pipeline
+    - put: lock
+      params:
+        claim: <%= env.Name %>
+    - get: config
+      resource: <%= env.Name %>-config
+    - get: cf-backup
+      resource: <%= env.Name %>-cf-s3-backup
+      params:
+        unpack: true
+  - file: pipeline/ci/tasks/restore-cf.yml
+    params:
+      DEBUG:              (( grab meta.<%=env.Name %>.debug ))
+      BOSH_TARGET:        (( grab meta.<%=env.Name %>.cf.bosh_target ))
+      BOSH_CLIENT:        (( grab meta.<%=env.Name %>.cf.bosh_client ))
+      BOSH_CLIENT_SECRET: (( grab meta.<%=env.Name %>.cf.bosh_client_secret ))
+      BOSH_CA_CERT:       (( grab meta.<%=env.Name %>.cf.bosh_ca_cert ))
+      PAS_DEPLOYMENT_NAME: (( grab meta.<%=env.Name %>.cf.pas_deployment_name ))
+      BBR_USERNAME:       (( grab meta.<%= env.Name %>.cf.bbr_username ))
+      BBR_SSH_KEY:        (( grab meta.<%= env.Name %>.cf.bbr_ssh_key ))
+    task: restore
+  ensure:
+    put: lock
+    params:
+      release: lock
+<% } %>
 <% } %>
 
 resources:
@@ -203,17 +298,6 @@ resources:
     branch:      (( grab meta.pipeline.branch || "master" ))
     private_key: (( grab meta.pipeline.private_key  || nil ))
     uri:         (( grab meta.pipeline.uri ))
-<% for _, env := range config.Envs { %>
-- name: <%= env.Name %>-config
-  type: git
-  source:
-    paths:
-    - default/<%= config.Name %>
-    - <%= env.Name %>/<%= config.Name %>
-    branch:      (( grab meta.configs.branch || "master" ))
-    private_key: (( grab meta.configs.private_key ))
-    uri:         (( grab meta.configs.uri ))
-<% } %>
 
 - name: lock
   type: pool
@@ -225,6 +309,35 @@ resources:
 
 - name: metadata
   type: build-metadata
+
+<% for _, env := range config.Envs { %>
+- name: <%= env.Name %>-config
+  type: git
+  source:
+    paths:
+    - default/<%= config.Name %>
+    - <%= env.Name %>/<%= config.Name %>
+    branch:      (( grab meta.configs.branch || "master" ))
+    private_key: (( grab meta.configs.private_key ))
+    uri:         (( grab meta.configs.uri ))
+
+<% if env.HasFeature("backup-daily") { %>
+- name: <%= env.Name %>-every-day
+  type: time
+  source:
+    interval: 24h
+<% } %>
+
+<% if (env.HasFeature("backup") || env.HasFeature("restore")) { %>
+- name: <%= env.Name %>-cf-s3-backup
+  source:
+    bucket:            (( grab meta.<%= env.Name %>.s3.bucket ))
+    versioned_file:    <%= env.Name %>/<%= config.Name %>/cf.tgz
+    access_key_id:     (( grab meta.<%= env.Name %>.s3.access_key_id ))
+    secret_access_key: (( grab meta.<%= env.Name %>.s3.secret_access_key ))
+  type: s3
+<% } %>
+<% } %>
 
 <% if artifactoryStemcell { %>
 - name: stemcell

@@ -14,6 +14,8 @@ params:
   BOSH_CLIENT_SECRET:
   BOSH_CA_CERT:
   PAS_DEPLOYMENT_NAME:
+  BBR_USERNAME:
+  BBR_PASSWORD:
 
 inputs:
   - name: pipeline

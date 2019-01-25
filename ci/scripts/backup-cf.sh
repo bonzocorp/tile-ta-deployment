@@ -1,6 +1,11 @@
 #!/bin/bash
 
-source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/common.sh
+exec >&2
+set -e
+
+[[ "${DEBUG,,}" == "true" ]] && set -x && env
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/common_backup.sh
 
 function backup_cf() {
   local deployment_command="

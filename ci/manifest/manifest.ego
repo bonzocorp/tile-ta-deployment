@@ -141,6 +141,16 @@ jobs:
       put: <%= env.Name %>-cf-s3-backup
       params:
         file: output/cf.tgz
+    on_failure:
+     task: cleanup-cf
+     file: pipeline/ci/tasks/cleanup-cf.yml
+     params:
+       <<: *<%= env.Name %>_configs
+  ensure:
+    put: lock
+    params:
+      release: lock
+
   <% } %>
 
   - task: upgrade

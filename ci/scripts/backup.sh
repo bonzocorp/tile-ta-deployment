@@ -10,8 +10,8 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/common.sh
 function backup() {
   local output_dir=$PWD/output
   local build_dir=$PWD/build
-  local bosh_ca_cert_file=$BUILD_DIR/bosh-ca.crt
-  local bbr_ssh_key_file=$BUILD_DIR/bbr.pem
+  local bosh_ca_cert_file=$build_dir/bosh-ca.crt
+  local bbr_ssh_key_file=$build_dir/bbr.pem
 
   local deployment_command="
     bbr deployment

@@ -17,7 +17,7 @@ function backup() {
     bbr deployment
       --target $BOSH_TARGET
       --username $BOSH_CLIENT
-      --deployment $PAS_DEPLOYMENT_NAME
+      --deployment $DEPLOYMENT_NAME
       --ca-cert $bosh_ca_cert_file"
 
   echo "$BOSH_CA_CERT" > $bosh_ca_cert_file

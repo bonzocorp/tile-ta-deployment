@@ -10,14 +10,9 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/common.sh
 function backup() {
   local output_dir=$PWD/output
   local build_dir=$PWD/build
-  local bosh_ca_cert_file=$BOSH_CA_CERT
-  local bbr_ssh_key_file=$BBR_SSH_KEY
 
-#  local bosh_ca_cert_file=$build_dir/bosh-ca.crt
-#  local bbr_ssh_key_file=$build_dir/bbr.pem
-
-#  echo "$BOSH_CA_CERT" > $bosh_ca_cert_file
-#  echo "$BBR_SSH_KEY" > $bbr_ssh_key_file
+  local bosh_ca_cert_file=$build_dir/bosh-ca.crt
+  local bbr_ssh_key_file=$build_dir/bbr.pem
 
   local deployment_command="
     bbr deployment
@@ -25,6 +20,9 @@ function backup() {
       --username $BOSH_CLIENT
       --deployment $DEPLOYMENT_NAME
       --ca-cert $bosh_ca_cert_file"
+
+#  echo "$BOSH_CA_CERT" > $bosh_ca_cert_file
+#  echo "$BBR_SSH_KEY" > $bbr_ssh_key_file
 
   mkdir -p $output_dir
   mkdir -p $build_dir/backup

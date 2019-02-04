@@ -26,7 +26,7 @@ function backup() {
   mkdir -p $output_dir
   mkdir -p $build_dir/backup
 
-  pushd $BUILD_DIR/backup > /dev/null
+  pushd $build_dir/backup > /dev/null
     log "Prechecking deployment backup"
     $deployment_command pre-backup-check
 

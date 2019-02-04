@@ -24,4 +24,4 @@ outputs:
   - name: output
 
 run:
-  path: pipeline/ci/scripts/backup-cf.sh
+  path: pipeline/ci/scripts/backup.sh

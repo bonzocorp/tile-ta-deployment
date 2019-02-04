@@ -77,20 +77,20 @@ groups:
   - <%= env.Name %>-upgrade
 <% } %>
 
+<% for _, env := range config.Envs { %>
+<% if env.HasFeature("backup") { %>
 - name: backup
   jobs:
-<% for _, env := range config.Envs { %>
-  <% if env.HasFeature("backup") { %>
   - <%= env.Name %>-backup
-  <% } %>
+<% } %>
 <% } %>
 
+<% for _, env := range config.Envs { %>
+<% if env.HasFeature("restore") { %>
 - name: restore
   jobs:
-<% for _, env := range config.Envs { %>
-  <% if env.HasFeature("restore") { %>
   - <%= env.Name %>-restore
-  <% } %>
+<% } %>
 <% } %>
 
 - name: destroy
@@ -134,23 +134,25 @@ jobs:
   <% } %>
 
   <% if env.HasFeature("backup") { %>
-  - task: backup-cf
-    file: pipeline/ci/tasks/backup-cf.yml
-    params:
+  - task: backup
+    file: pipeline/ci/tasks/backup.yml
+   # params:
     on_success:
-      put: <%= env.Name %>-cf-s3-backup
+      put: <%= env.Name %>-<%= config.Name %>-s3-backup
       params:
-        file: output/cf.tgz
+        file: output/backup.tgz
     on_failure:
-     task: cleanup-cf
-     file: pipeline/ci/tasks/cleanup-cf.yml
-     params:
-       <<: *<%= env.Name %>_configs
-  ensure:
-    put: lock
+     task: cleanup- <%= config.Name %>
+     file: pipeline/ci/tasks/cleanup.yml
     params:
-      release: lock
-
+      DEBUG:              (( grab meta.<%= env.Name %>.debug ))
+      BOSH_TARGET:        (( grab meta.<%= env.Name %>.bosh_target ))
+      BOSH_CLIENT:        (( grab meta.<%= env.Name %>.bosh_client ))
+      BOSH_CLIENT_SECRET: (( grab meta.<%= env.Name %>.bosh_client_secret ))
+      BOSH_CA_CERT:       (( grab meta.<%= env.Name %>.bosh_ca_cert ))
+      DEPLOYMENT_NAME:    (( grab meta.<%= env.Name %>.deployment_name ))
+      BBR_USERNAME:       (( grab meta.<%= env.Name %>.bbr_username ))
+      BBR_SSH_KEY:        (( grab meta.<%= env.Name %>.bbr_ssh_key ))
   <% } %>
 
   - task: upgrade
@@ -240,21 +242,21 @@ jobs:
     - put: lock
       params:
         claim: <%= env.Name %>
-  - task: backup-cf
-    file: pipeline/ci/tasks/backup-cf.yml
+  - task: backup
+    file: pipeline/ci/tasks/backup.yml
     on_success:
-      put: <%= env.Name %>-cf-s3-backup
+      put: <%= env.Name %>-<%= config.Name %>-s3-backup
       params:
-        file: output/cf.tgz
+        file: output/backup.tgz
     params:
-      DEBUG:              (( grab meta.<%=env.Name %>.debug ))
-      BOSH_TARGET:        (( grab meta.<%=env.Name %>.cf.bosh_target ))
-      BOSH_CLIENT:        (( grab meta.<%=env.Name %>.cf.bosh_client ))
-      BOSH_CLIENT_SECRET: (( grab meta.<%=env.Name %>.cf.bosh_client_secret ))
-      BOSH_CA_CERT:       (( grab meta.<%=env.Name %>.cf.bosh_ca_cert ))
-      PAS_DEPLOYMENT_NAME: (( grab meta.<%=env.Name %>.cf.pas_deployment_name ))
-      BBR_USERNAME:       (( grab meta.<%= env.Name %>.cf.bbr_username ))
-      BBR_SSH_KEY:        (( grab meta.<%= env.Name %>.cf.bbr_ssh_key ))
+      DEBUG:               (( grab meta.<%= env.Name %>.debug ))
+      BOSH_TARGET:         (( grab meta.<%= env.Name %>.bosh_target ))
+      BOSH_CLIENT:         (( grab meta.<%= env.Name %>.bosh_client ))
+      BOSH_CLIENT_SECRET:  (( grab meta.<%= env.Name %>.bosh_client_secret ))
+      BOSH_CA_CERT:        (( grab meta.<%= env.Name %>.bosh_ca_cert ))
+      PAS_DEPLOYMENT_NAME: (( grab meta.<%=env.Name %>.deployment_name ))
+      BBR_USERNAME:        (( grab meta.<%= env.Name %>.bbr_username ))
+      BBR_SSH_KEY:         (( grab meta.<%= env.Name %>.bbr_ssh_key ))
   ensure:
     put: lock
     params:
@@ -272,20 +274,20 @@ jobs:
         claim: <%= env.Name %>
     - get: config
       resource: <%= env.Name %>-config
-    - get: cf-backup
-      resource: <%= env.Name %>-cf-s3-backup
+    - get: backup
+      resource: <%= env.Name %>-<%= config.Name %>-s3-backup
       params:
         unpack: true
-  - file: pipeline/ci/tasks/restore-cf.yml
+  - file: pipeline/ci/tasks/restore.yml
     params:
-      DEBUG:              (( grab meta.<%=env.Name %>.debug ))
-      BOSH_TARGET:        (( grab meta.<%=env.Name %>.cf.bosh_target ))
-      BOSH_CLIENT:        (( grab meta.<%=env.Name %>.cf.bosh_client ))
-      BOSH_CLIENT_SECRET: (( grab meta.<%=env.Name %>.cf.bosh_client_secret ))
-      BOSH_CA_CERT:       (( grab meta.<%=env.Name %>.cf.bosh_ca_cert ))
-      PAS_DEPLOYMENT_NAME: (( grab meta.<%=env.Name %>.cf.pas_deployment_name ))
-      BBR_USERNAME:       (( grab meta.<%= env.Name %>.cf.bbr_username ))
-      BBR_SSH_KEY:        (( grab meta.<%= env.Name %>.cf.bbr_ssh_key ))
+      DEBUG:              (( grab meta.<%= env.Name %>.debug ))
+      BOSH_TARGET:        (( grab meta.<%= env.Name %>.bosh_target ))
+      BOSH_CLIENT:        (( grab meta.<%= env.Name %>.bosh_client ))
+      BOSH_CLIENT_SECRET: (( grab meta.<%= env.Name %>.bosh_client_secret ))
+      BOSH_CA_CERT:       (( grab meta.<%= env.Name %>.bosh_ca_cert ))
+      DEPLOYMENT_NAME:    (( grab meta.<%= env.Name %>.pas_deployment_name ))
+      BBR_USERNAME:       (( grab meta.<%= env.Name %>.bbr_username ))
+      BBR_SSH_KEY:        (( grab meta.<%= env.Name %>.bbr_ssh_key ))
     task: restore
   ensure:
     put: lock
@@ -332,17 +334,17 @@ resources:
     uri:         (( grab meta.configs.uri ))
 
 <% if env.HasFeature("backup-daily") { %>
-- name: <%= env.Name %>-every-day
+- name: every-day
   type: time
   source:
     interval: 24h
 <% } %>
 
 <% if (env.HasFeature("backup") || env.HasFeature("restore")) { %>
-- name: <%= env.Name %>-cf-s3-backup
+- name: <%= env.Name %>-<%= config.Name %>-s3-backup
   source:
     bucket:            (( grab meta.<%= env.Name %>.s3.bucket ))
-    versioned_file:    <%= env.Name %>/<%= config.Name %>/cf.tgz
+    versioned_file:    <%= env.Name %>/<%= config.Name %>/backup.tgz
     access_key_id:     (( grab meta.<%= env.Name %>.s3.access_key_id ))
     secret_access_key: (( grab meta.<%= env.Name %>.s3.secret_access_key ))
   type: s3

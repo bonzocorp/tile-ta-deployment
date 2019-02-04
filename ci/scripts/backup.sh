@@ -34,7 +34,7 @@ function backup() {
     $deployment_command backup --with-manifest
 
     log "Compressing backup files"
-    tar -cvzf $output_dir/backup.tgz --remove-file -- *
+    tar -cvzf $output_dir/backup.tgz --remove-files -- *
   popd > /dev/null
 }
 

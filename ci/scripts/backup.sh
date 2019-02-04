@@ -17,8 +17,10 @@ function backup() {
   echo "$BOSH_CA_CERT" >> $build_dir/bosh-ca.crt
   echo "$BBR_SSH_KEY" >> $build_dir/bbr.pem
 
-  local bosh_ca_cert_file="$(build_dir)/bosh-ca.crt"
-  local bbr_ssh_key_file="$(build_dir)/bbr.pem"
+  echo "DEPLOYMENT NAME:  $DEPLOYMENT_NAME"
+
+  local bosh_ca_cert_file="$build_dir/bosh-ca.crt"
+  local bbr_ssh_key_file="$build_dir/bbr.pem"
 
   local deployment_command="
     bbr deployment

@@ -25,12 +25,11 @@ function log() {
   echo -e "${green}$1${reset}"
 }
 
-function load_custom_certs(){
-  echo "+++++++Root CA: $CUSTOM_ROOT_CA"
-  echo $CUSTOM_ROOT_CA > /etc/ssl/certs/custom_root_ca.crt
-  echo "+++++++Intermediate CA: $CUSTOM_INTERMEDIATE_CA"
-  echo $CUSTOM_INTERMEDIATE_CA > /etc/ssl/certs/custom_intermediate_ca.crt
-  update-ca-certificates
+function warning() {
+  orange='\033[1;33m'
+  reset='\033[0m'
+
+  echo -e "${orange}$1${reset}"
 }
 
 function error() {
@@ -39,6 +38,25 @@ function error() {
 
   echo -e "${red}$1${reset}"
   exit 1
+}
+
+function find_or_create(){
+  files=$1
+
+  for file in $files; do
+    if [ ! -f "$file" ]; then
+      warning "$file is empty; skipping merge of this file"
+      echo -e "---\n{}" > $file
+    fi
+  done
+}
+
+function load_custom_certs(){
+  echo "+++++++Root CA: $CUSTOM_ROOT_CA"
+  echo $CUSTOM_ROOT_CA > /etc/ssl/certs/custom_root_ca.crt
+  echo "+++++++Intermediate CA: $CUSTOM_INTERMEDIATE_CA"
+  echo $CUSTOM_INTERMEDIATE_CA > /etc/ssl/certs/custom_intermediate_ca.crt
+  update-ca-certificates
 }
 
 function apply_changes() {

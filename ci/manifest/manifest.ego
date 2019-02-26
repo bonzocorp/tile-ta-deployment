@@ -77,20 +77,20 @@ groups:
   - <%= env.Name %>-upgrade
 <% } %>
 
-<% for _, env := range config.Envs { %>
-<% if env.HasFeature("backup") { %>
 - name: backup
   jobs:
+<% for _, env := range config.Envs { %>
+  <% if env.HasFeature("backup") { %>
   - <%= env.Name %>-backup
-<% } %>
+  <% } %>
 <% } %>
 
-<% for _, env := range config.Envs { %>
-<% if env.HasFeature("restore") { %>
 - name: restore
   jobs:
+<% for _, env := range config.Envs { %>
+  <% if env.HasFeature("restore") { %>
   - <%= env.Name %>-restore
-<% } %>
+  <% } %>
 <% } %>
 
 - name: destroy
@@ -142,7 +142,7 @@ jobs:
       params:
         file: output/backup.tgz
     on_failure:
-     task: cleanup- <%= config.Name %>
+     task: cleanup-<%= config.Name %>
      file: pipeline/ci/tasks/cleanup.yml
     params:
       DEBUG:              (( grab meta.<%= env.Name %>.debug ))
@@ -248,13 +248,16 @@ jobs:
       put: <%= env.Name %>-<%= config.Name %>-s3-backup
       params:
         file: output/backup.tgz
+    on_failure:
+     task: cleanup-<%= config.Name %>
+     file: pipeline/ci/tasks/cleanup.yml
     params:
       DEBUG:               (( grab meta.<%= env.Name %>.debug ))
       BOSH_TARGET:         (( grab meta.<%= env.Name %>.bosh_target ))
       BOSH_CLIENT:         (( grab meta.<%= env.Name %>.bosh_client ))
       BOSH_CLIENT_SECRET:  (( grab meta.<%= env.Name %>.bosh_client_secret ))
       BOSH_CA_CERT:        (( grab meta.<%= env.Name %>.bosh_ca_cert ))
-      PAS_DEPLOYMENT_NAME: (( grab meta.<%=env.Name %>.deployment_name ))
+      DEPLOYMENT_NAME:     (( grab meta.<%= env.Name %>.deployment_name ))
       BBR_USERNAME:        (( grab meta.<%= env.Name %>.bbr_username ))
       BBR_SSH_KEY:         (( grab meta.<%= env.Name %>.bbr_ssh_key ))
   ensure:
@@ -285,7 +288,7 @@ jobs:
       BOSH_CLIENT:        (( grab meta.<%= env.Name %>.bosh_client ))
       BOSH_CLIENT_SECRET: (( grab meta.<%= env.Name %>.bosh_client_secret ))
       BOSH_CA_CERT:       (( grab meta.<%= env.Name %>.bosh_ca_cert ))
-      DEPLOYMENT_NAME:    (( grab meta.<%= env.Name %>.pas_deployment_name ))
+      DEPLOYMENT_NAME:    (( grab meta.<%= env.Name %>.deployment_name ))
       BBR_USERNAME:       (( grab meta.<%= env.Name %>.bbr_username ))
       BBR_SSH_KEY:        (( grab meta.<%= env.Name %>.bbr_ssh_key ))
     task: restore

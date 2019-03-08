@@ -82,7 +82,7 @@ function download_stemcell() {
     if any(.Dependencies[]; select(.Release.Product.Name | contains("Stemcells for PCF (Windows)"))) then
       "stemcells-windows-server"
     elif any(.Dependencies[]; select(.Release.Product.Name | contains("Stemcells for PCF (Ubuntu Xenial)"))) then
-      "stemcells-xenial"
+      "stemcells-ubuntu-xenial"
     else
       "stemcells"
     end
@@ -92,11 +92,6 @@ function download_stemcell() {
     # Login and download the stemcell
     if [[ "$IAAS" == "vsphere" && "$product_slug" == "stemcells-windows-server" ]]; then
       log "Skipping because there are no vsphere Windows stemcells on Pivnet"
-    elif [[ "$product_slug" == "stemcells-xenial" ]]; then
-      log "Xenial stemcells are not available on pivnet, using bosh.io instead"
-      pushd stemcell >/dev/null
-        wget "https://s3.amazonaws.com/bosh-core-stemcells/${IAAS}/bosh-stemcell-${STEMCELL_VERSION}-${IAAS}-esxi-ubuntu-xenial-go_agent.tgz"
-      popd >/dev/null
     else
       pivnet \
         login \

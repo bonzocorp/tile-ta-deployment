@@ -41,7 +41,7 @@ function is_stemcell_uploaded() {
   # If stemcell version is available, check om
   if [ -n "$STEMCELL_VERSION" ]; then
     diagnostic_report=$(
-    om-linux \
+    om \
       --target $OM_TARGET \
       $om_options \
       curl \

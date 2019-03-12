@@ -10,12 +10,12 @@ function generate_config() {
 
   find_or_create "$NETWORK_CONFIG $PROPERTIES_CONFIG $RESOURCES_CONFIG"
 
-  spruce merge --prune meta $NETWORK_CONFIG    | spruce json > $OUTPUT/network.json
-  spruce merge --prune meta $PROPERTIES_CONFIG | spruce json > $OUTPUT/properties.json
-  spruce merge --prune meta $RESOURCES_CONFIG | spruce json > $OUTPUT/resources.json
+  spruce merge --prune meta $NETWORK_CONFIG    2>/dev/null | spruce json 2>/dev/null > $OUTPUT/network.json
+  spruce merge --prune meta $PROPERTIES_CONFIG 2>/dev/null | spruce json 2>/dev/null > $OUTPUT/properties.json
+  spruce merge --prune meta $RESOURCES_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/resources.json
 
   if [ -n "$ERRANDS_CONFIG" ]; then
-    spruce merge --prune meta $ERRANDS_CONFIG | spruce json > $OUTPUT/errands.json
+    spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/errands.json
   fi
 }
 

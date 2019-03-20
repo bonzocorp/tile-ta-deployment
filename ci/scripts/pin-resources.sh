@@ -14,11 +14,11 @@ function pin_versions(){
     resource_name=$(echo $pin | cut -d':' -f1)
     version_regex=$(echo $pin | cut -d':' -f2)
 
-    versions_response="$(fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions)"
+    versions_response="$(fly -t concourse -k curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions)"
 
     version_id=$(echo $version_response | jq -r ".[] | select(.version.product_version | contains('$version_regex')) | .id")
 
-    fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions/$version_id/pin
+    fly -t concourse -k curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions/$version_id/pin
   done < $PINS_FILE
 }
 

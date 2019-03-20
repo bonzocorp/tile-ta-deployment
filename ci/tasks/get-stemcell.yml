@@ -18,7 +18,7 @@ params:
   PIVNET_API_TOKEN:
 
 inputs:
-  - name: product
+  - name: tile
   - name: pipeline
 
 outputs:

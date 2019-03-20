@@ -10,6 +10,7 @@ image_resource:
 
 inputs:
   - name: config
+  - name: pipeline
 
 run:
   path: pipeline/ci/scripts/pin-resources.sh

@@ -52,6 +52,16 @@ function error() {
   exit 1
 }
 
+function check_if_exists(){
+  ERROR_MSG=$1
+  CONTENT=$2
+
+  if [[ -z "$CONTENT" ]] || [[ "$CONTENT" == "null" ]]; then
+    echo $ERROR_MSG
+    exit 1
+  fi
+}
+
 function find_or_create(){
   files=$1
 

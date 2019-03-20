@@ -16,7 +16,7 @@ function pin_versions(){
 
     versions_response="$(fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions -- -k)"
 
-    version_id=$(echo $version_response | jq -r ".[] | select(.version.product_version | contains('$version_regex')) | .id")
+    version_id=$(echo $versions_response | jq -r ".[] | select(.version.product_version | contains('$version_regex')) | .id")
 
     fly -t concourse -k curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions/$version_id/pin -- -k -X PUT
   done < $PINS_FILE

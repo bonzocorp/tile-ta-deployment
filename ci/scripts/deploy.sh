@@ -211,7 +211,7 @@ function commit_config(){
 
 trap "commit_config" EXIT
 
-load_custom_certs
+load_custom_ca_certs
 generate_config
 upload_stemcell
 replicate_product

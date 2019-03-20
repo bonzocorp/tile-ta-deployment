@@ -9,7 +9,7 @@ STEMCELL=
 STEMCELL_VERSION=
 
 output_dir=./stemcell
-metadata_file=./product/metadata.json
+metadata_file=./tile/metadata.json
 
 function get_stemcell_version() {
   log "Getting stemcell version"

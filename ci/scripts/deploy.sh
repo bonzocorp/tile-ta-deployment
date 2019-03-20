@@ -92,12 +92,12 @@ function sanitize_opsman_creds() {
 function replicate_product() {
   if [[ -n "${REPLICATOR_NAME}" ]]; then
     log "Replicating product: $product_file_path -> $REPLICATOR_NAME"
-    product_file_path=`find ./product -name *.pivotal | sort | head -1`
+    product_file_path=`find ./tile -name *.pivotal | sort | head -1`
     echo "replicating product: $product_file_path"
     replicator \
       -name "$REPLICATOR_NAME" \
       -path "$product_file_path" \
-      -output ./product/$REPLICATOR_NAME.pivotal
+      -output ./tile/$REPLICATOR_NAME.pivotal
     mv $product_file_path $product_file_path.bak
   else
     log "Skipping Replicating: No REPLICATOR_NAME provided."
@@ -108,10 +108,10 @@ function winfs_inject_product() {
   # Replicate the product
   if [[ "${WINDOWS,,}" == "true" ]]; then
     log "winfs injecting product: $product_file_path"
-    product_file_path=`find ./product -name *.pivotal | sort | head -1`
+    product_file_path=`find ./tile -name *.pivotal | sort | head -1`
     winfs-injector \
       -i "$product_file_path" \
-      -o ./product/$PRODUCT_NAME-injected.pivotal
+      -o ./tile/$PRODUCT_NAME-injected.pivotal
     mv $product_file_path $product_file_path.bak
   else
     log "Skipping winfs injecting product: WINDOWS is empty or false."
@@ -119,7 +119,7 @@ function winfs_inject_product() {
 }
 
 function upload_product() {
-  product_file_path=`find ./product -name *.pivotal | sort | head -1`
+  product_file_path=`find ./tile -name *.pivotal | sort | head -1`
 
   if [[ -n $product_file_path ]]; then
     log "Uploading product: $product_file_path"
@@ -134,10 +134,10 @@ function upload_product() {
 }
 
 function stage_product() {
-  if [[ -d ./product ]]; then
+  if [[ -d ./tile ]]; then
     log "Staging product: $PRODUCT_NAME"
 
-    product_version=$(cat ./product/version | sed 's/#.*//')
+    product_version=$(cat ./tile/version | sed 's/#.*//')
     product_version=$( om -t $OM_TARGET $om_options available-products --format json | \
       jq -r --arg PRODUCT_VERSION "$product_version" --arg PRODUCT_NAME "$PRODUCT_NAME" \
       '.[] | select(.name == $PRODUCT_NAME and (.version | test($PRODUCT_VERSION; "i"))) | .version'

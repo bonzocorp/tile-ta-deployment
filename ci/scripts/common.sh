@@ -18,6 +18,7 @@ om_options+=" --request-timeout ${OM_REQUEST_TIMEOUT:-3600}"
 OUTPUT=output
 mkdir -p $OUTPUT
 
+function load_custom_ca_certs(){
   if [[ ! -z "$CUSTOM_ROOT_CA" ]] ; then
     echo -e "$CUSTOM_ROOT_CA" > /etc/ssl/certs/custom_root_ca.crt
   fi

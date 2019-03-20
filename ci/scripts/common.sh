@@ -73,14 +73,6 @@ function find_or_create(){
   done
 }
 
-function load_custom_certs(){
-  echo "+++++++Root CA: $CUSTOM_ROOT_CA"
-  echo $CUSTOM_ROOT_CA > /etc/ssl/certs/custom_root_ca.crt
-  echo "+++++++Intermediate CA: $CUSTOM_INTERMEDIATE_CA"
-  echo $CUSTOM_INTERMEDIATE_CA > /etc/ssl/certs/custom_intermediate_ca.crt
-  update-ca-certificates
-}
-
 function apply_changes() {
   product_guid="$(get_product_guid)"
 
@@ -146,3 +138,5 @@ function get_product_guid() {
       --path /api/v0/staged/products \
   | jq -r '.[] | select(.type == "'$PRODUCT_NAME'") | .guid'
 }
+
+load_custom_ca_certs

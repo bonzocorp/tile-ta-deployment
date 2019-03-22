@@ -2,7 +2,25 @@
 
 Travel agent deployment project to deploy pivotal tiles
 
-## Available travel-agent features
+
+## Global features
+
+**tile_updates**
+
+Sends slack notification when a new tile is available.
+
+**update_deployment**
+
+When enabled it will create update jobs for each of your environments. This can be useful when
+you do not want a new tile or stemcell to apply when deploying.
+
+**pin_versions**
+
+__Note__: Requires concourse v5
+
+Pins resources to provided version through a yaml config file.
+
+## Environment Features
 
 **allow_destroy**
 

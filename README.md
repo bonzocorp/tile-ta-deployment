@@ -5,7 +5,7 @@ Travel agent deployment project to deploy pivotal tiles
 
 ## Global features
 
-**tile_updates**
+**slack_updates**
 
 Sends slack notification when a new tile is available.
 
@@ -21,6 +21,10 @@ __Note__: Requires concourse v5
 Pins resources to provided version through a yaml config file.
 
 ## Environment Features
+
+**slack_updates**
+
+Requires global **slack_updates**. Sends slack notification when a deployment upgrade finishes.
 
 **allow_destroy**
 

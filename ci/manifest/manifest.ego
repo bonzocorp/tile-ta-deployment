@@ -92,7 +92,7 @@ groups:
 
 jobs:
 
-<% if config.HasFeature("tile_updates") { %>
+<% if config.HasFeature("slack_updates") { %>
 - name: tile-updates
   plan:
   - get: <%= config.Name %>-new-tile
@@ -102,9 +102,9 @@ jobs:
     on_success:
       put: notify
       params:
-        channel:  (( grab meta.tile_updates.slack.channel ))
-        username: (( grab meta.tile_updates.slack.username ))
-        icon_url: (( grab meta.tile_updates.slack.icon_url ))
+        channel:  (( grab meta.slack_updates.channel ))
+        username: (( grab meta.slack_updates.username ))
+        icon_url: (( grab meta.slack_updates.icon_url ))
         text: "New <%= config.Name %> tile available"
 <% } %>
 
@@ -211,6 +211,22 @@ jobs:
       WINDOWS:             (( grab meta.windows || false ))
       STORE_FILE:          (( grab meta.<%= env.Name %>.store_file ))
       YAML2VAULT_PREFIX:   (( grab meta.<%= env.Name %>.yaml2vault_prefix ))
+<% if env.HasFeature("slack_updates") { %>
+    on_success:
+      put: notify
+      params:
+        channel:  (( grab meta.slack_updates.channel ))
+        username: (( grab meta.slack_updates.username ))
+        icon_url: (( grab meta.slack_updates.success.icon_url ))
+        text: "Finish <%= config.Name %> tile deployment successfully"
+    on_failure:
+      put: notify
+      params:
+        channel:  (( grab meta.slack_updates.channel ))
+        username: (( grab meta.slack_updates.username ))
+        icon_url: (( grab meta.slack_updates.failure.icon_url ))
+        text: "Finish <%= config.Name %> tile deployment with failure"
+<% } %>
   ensure: &<%= env.Name %>-ensure
     put: config
     resource: <%= env.Name %>-config
@@ -358,20 +374,6 @@ resources:
     product_slug: (( grab meta.product_slug ))
     sort_by: semver
 
-<% if config.HasFeature("tile_updates") { %>
-- name: <%= config.Name %>-new-tile
-  type: pivnet
-  source:
-    api_token:    (( grab meta.pivnet_token ))
-    product_slug: (( grab meta.product_slug ))
-    sort_by: semver
-
-- name: notify
-  type: slack-notification
-  source:
-    url: (( grab meta.tile_updates.slack.uri || "" ))
-<% } %>
-
 - name: pipeline
   type: git
   source:
@@ -389,6 +391,20 @@ resources:
 
 - name: metadata
   type: build-metadata
+
+<% if config.HasFeature("slack_updates") { %>
+- name: <%= config.Name %>-new-tile
+  type: pivnet
+  source:
+    api_token:    (( grab meta.pivnet_token ))
+    product_slug: (( grab meta.product_slug ))
+    sort_by: semver
+
+- name: notify
+  type: slack-notification
+  source:
+    url: (( grab meta.slack_updates.uri || "" ))
+<% } %>
 
 <% if config.HasFeature("pin_versions") { %>
 - name: <%= config.Name %>-pins

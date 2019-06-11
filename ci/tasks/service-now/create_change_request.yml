@@ -1,0 +1,27 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bonzofenix/ci-tools
+    tag: edge
+
+params:
+  DEBUG: false
+  SNOW_API_USERNAME:
+  SNOW_API_PASSWORD:
+  SNOW_API_CHANGE_RECORD_ID:
+  SNOW_API_ACTION:
+  SNOW_API_PATH_TO_PAYLOAD:
+
+inputs:
+  - name: pipeline
+  - name: config
+  - name: metadata
+
+outputs:
+  - name: service-now
+
+run:
+  path: pipeline/ci/scripts/service-now/create_change_request.sh

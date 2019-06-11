@@ -3,7 +3,11 @@
 exec >&2
 set -e
 
-[[ "${DEBUG,,}" == "true" ]] && set -x
+if [[ "${DEBUG,,}" == "true" ]]; then
+  set -x
+  echo "Environment Variables:"
+  env
+fi
 
 # Extra options to append to the OM command
 om_options=""

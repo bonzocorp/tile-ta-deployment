@@ -199,6 +199,18 @@ jobs:
       BBR_SSH_KEY:        (( grab meta.<%= env.Name %>.bbr_ssh_key ))
   <% } %>
 
+  <% if env.HasFeature("service_now") { %>
+  - task: create_service_now_change_record
+    file: pipeline/ci/tasks/service-now/create_change_request.yml
+    params:
+      BASE_PAYLOAD: (( grab meta.<%= env.Name %>.service_now.create_change_record_payload ))
+      DEBUG:        (( grab meta.<%= env.Name %>.debug || false ))
+
+      SNOW_USERNAME: (( grab meta.<%= env.Name %>.service_now.username ))
+      SNOW_PASSWORD: (( grab meta.<%= env.Name %>.service_now.password ))
+      SNOW_API_URL: (( grab meta.<%= env.Name %>.service_now.api_url ))
+  <% } %>
+
   - task: upgrade
     file: pipeline/ci/tasks/upgrade.yml
     params:
@@ -213,22 +225,51 @@ jobs:
       WINDOWS:             (( grab meta.windows || false ))
       STORE_FILE:          (( grab meta.<%= env.Name %>.store_file ))
       YAML2VAULT_PREFIX:   (( grab meta.<%= env.Name %>.yaml2vault_prefix ))
-<% if env.HasFeature("slack_updates") { %>
+    <% if env.HasFeature("slack_updates") || env.HasFeature("service_now") { %>
     on_success:
-      put: notify
-      params:
-        channel:  (( grab meta.slack_updates.channel ))
-        username: (( grab meta.slack_updates.username ))
-        icon_url: (( grab meta.slack_updates.success.icon_url ))
-        text: "Finish <%= config.Name %> tile deployment successfully"
+      do:
+      <% if env.HasFeature("slack_updates") { %>
+      - put: notify
+        params:
+          channel:  (( grab meta.slack_updates.channel ))
+          username: (( grab meta.slack_updates.username ))
+          icon_url: (( grab meta.slack_updates.success.icon_url ))
+          text: "Finish <%= config.Name %> tile deployment successfully"
+      <% } %>
+      <% if env.HasFeature("service_now") { %>
+      - task: close_service_now_change_task
+        file: pipeline/ci/tasks/service-now/close_change_task.yml
+        params:
+          SNOW_USERNAME: (( grab meta.<%= env.Name %>.service_now.username ))
+          SNOW_PASSWORD: (( grab meta.<%= env.Name %>.service_now.password ))
+          SNOW_API_URL: (( grab meta.<%= env.Name %>.service_now.api_url ))
+
+          IMPLEMENTATION_RESULT: "Implemented - Successfully"
+
+          DEBUG:    (( grab meta.<%= env.Name %>.debug || false ))
+      <% } %>
     on_failure:
-      put: notify
-      params:
-        channel:  (( grab meta.slack_updates.channel ))
-        username: (( grab meta.slack_updates.username ))
-        icon_url: (( grab meta.slack_updates.failure.icon_url ))
-        text: "Finish <%= config.Name %> tile deployment with failure"
-<% } %>
+      do:
+      <% if env.HasFeature("slack_updates") { %>
+      - put: notify
+        params:
+          channel:  (( grab meta.slack_updates.channel ))
+          username: (( grab meta.slack_updates.username ))
+          icon_url: (( grab meta.slack_updates.failure.icon_url ))
+          text: "Finish <%= config.Name %> tile deployment with failure"
+      <% } %>
+      <% if env.HasFeature("service_now") { %>
+      - task: close_service_now_change_task
+        file: pipeline/ci/tasks/service-now/close_change_task.yml
+        params:
+          SNOW_USERNAME: (( grab meta.<%= env.Name %>.service_now.username ))
+          SNOW_PASSWORD: (( grab meta.<%= env.Name %>.service_now.password ))
+          SNOW_API_URL: (( grab meta.<%= env.Name %>.service_now.api_url ))
+
+          IMPLEMENTATION_RESULT: "Implemented - With error / issue"
+      <% } %>
+    <% } %>
+
   ensure: &<%= env.Name %>-ensure
     put: config
     resource: <%= env.Name %>-config
@@ -426,6 +467,9 @@ resources:
     paths:
     - default/<%= config.Name %>
     - <%= env.Name %>/<%= config.Name %>
+<% if env.HasFeature("service_now") { %>
+    - <%= env.Name %>/service_now
+<% } %>
     branch:      (( grab meta.configs.branch || "master" ))
     private_key: (( grab meta.configs.private_key ))
     uri:         (( grab meta.configs.uri ))

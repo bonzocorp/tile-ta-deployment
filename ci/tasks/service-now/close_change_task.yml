@@ -1,0 +1,26 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bonzofenix/ci-tools
+    tag: edge
+
+params:
+  DEBUG: false
+  SNOW_API_USERNAME:
+  SNOW_API_PASSWORD:
+  SNOW_API_CHANGE_RECORD_ID:
+  SNOW_API_ACTION:
+  SNOW_API_PATH_TO_PAYLOAD:
+
+inputs:
+  - name: pipeline
+  - name: service-now
+
+outputs:
+  - name: service-now
+
+run:
+  path: pipeline/ci/scripts/service-now/close_change_task.sh

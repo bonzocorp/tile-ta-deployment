@@ -4,23 +4,24 @@ exec >&2
 set -e
 
 source pipeline/ci/scripts/common.sh
+source pipeline/ci/scripts/service-now/common.sh
 
 CREATE_PAYLOAD=output/create_payload.json
 
 function send_request(){
-  curl --user $SNOW_USERNAME:$SNOW_PASSWORD \
-    --header "Content-Type: application/json" \
-    -X POST -d @$CREATE_PAYLOAD $SNOW_API_URL/now/table/change_request > output/create_response.json
+  cr_url=$SNOW_API_URL/now/table/change_request
+
+  curl_snow -X POST \
+    -d @$CREATE_PAYLOAD \
+    $cr_url > output/create_response.json
 
   SYS_ID=$(cat output/create_response.json | jq -r ".result.sys_id")
 
   CURRENT_DATE=`date '+%Y-%m-%d %T'`
 
-  curl --user $SNOW_USERNAME:$SNOW_PASSWORD \
-    --header "Content-Type: application/json" \
-    -X PATCH \
+  curl_snow -X PATCH \
     -d "{\"state\":\"2\",\"u_acceptance_begin\":\"$CURRENT_DATE\"}" \
-    $SNOW_API_URL/now/table/change_request/$SYS_ID > output/acceptance_response.json
+    $cr_url/$SYS_ID > output/acceptance_response.json
 
 
   echo $SYS_ID > service-now/change_request_sys_id

@@ -35,6 +35,11 @@ Recomended only for dev environments.
 
 Download stemcell from artifactory instead of pivnet
 
+**service_now**
+
+It create a change request, sets the state of the request to
+implemented and after running the upgrade/update deployment it
+closes any change task associated to the change request.
 
 **backup**
 

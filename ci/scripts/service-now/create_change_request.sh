@@ -7,6 +7,7 @@ source pipeline/ci/scripts/common.sh
 source pipeline/ci/scripts/service-now/common.sh
 
 CREATE_PAYLOAD=output/create_payload.json
+ACCEPTANCE_STATE=2
 
 function send_request(){
   cr_url=$SNOW_API_URL/now/table/change_request
@@ -20,7 +21,7 @@ function send_request(){
   CURRENT_DATE=`date '+%Y-%m-%d %T'`
 
   curl_snow -X PATCH \
-    -d "{\"state\":\"2\",\"u_acceptance_begin\":\"$CURRENT_DATE\"}" \
+    -d "{\"state\":\"$ACCEPTANCE_STATE\",\"u_acceptance_begin\":\"$CURRENT_DATE\"}" \
     $cr_url/$SYS_ID > output/acceptance_response.json
 
 

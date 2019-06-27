@@ -19,6 +19,7 @@ function pin_versions(){
     log "Pinning $resource_name with version matching: $version_regex"
     version_id=$(echo $versions_response | jq -r ".[] | select(.version.product_version | contains(\"$version_regex\")) | .id")
 
+    fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/unpin -- -k -X PUT
     fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions/$version_id/pin -- -k -X PUT
   done < $PINS_FILE
 }

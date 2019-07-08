@@ -209,6 +209,11 @@ jobs:
       SNOW_USERNAME: (( grab meta.<%= env.Name %>.service_now.username ))
       SNOW_PASSWORD: (( grab meta.<%= env.Name %>.service_now.password ))
       SNOW_API_URL: (( grab meta.<%= env.Name %>.service_now.api_url ))
+
+      RUNNING_ESTIMATED_TIME: 1
+    <% if env.Feature("service_now") == "create-and-close" { %>
+      SNOW_ACCEPT_CHANGE_REQUEST:  true
+    <% } %>
   <% } %>
 
   - task: upgrade
@@ -225,7 +230,7 @@ jobs:
       WINDOWS:             (( grab meta.windows || false ))
       STORE_FILE:          (( grab meta.<%= env.Name %>.store_file ))
       YAML2VAULT_PREFIX:   (( grab meta.<%= env.Name %>.yaml2vault_prefix ))
-    <% if env.HasFeature("slack_updates") || env.HasFeature("service_now") { %>
+    <% if env.HasFeature("slack_updates") || env.Feature("service_now") == "create-and-close" { %>
     on_success:
       do:
       <% if env.HasFeature("slack_updates") { %>
@@ -236,7 +241,7 @@ jobs:
           icon_url: (( grab meta.slack_updates.success.icon_url ))
           text: "Finish <%= config.Name %> tile deployment successfully"
       <% } %>
-      <% if env.HasFeature("service_now") { %>
+      <% if env.Feature("service_now") == "create-and-close" { %>
       - task: close_service_now_change_task
         file: pipeline/ci/tasks/service-now/close_change_task.yml
         params:
@@ -258,7 +263,7 @@ jobs:
           icon_url: (( grab meta.slack_updates.failure.icon_url ))
           text: "Finish <%= config.Name %> tile deployment with failure"
       <% } %>
-      <% if env.HasFeature("service_now") { %>
+      <% if env.Feature("service_now") == "create-and-close" { %>
       - task: close_service_now_change_task
         file: pipeline/ci/tasks/service-now/close_change_task.yml
         params:

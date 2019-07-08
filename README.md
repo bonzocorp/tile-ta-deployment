@@ -37,9 +37,13 @@ Download stemcell from artifactory instead of pivnet
 
 **service_now**
 
-It create a change request, sets the state of the request to
-implemented and after running the upgrade/update deployment it
-closes any change task associated to the change request.
+Available values: `create`, `create-and-close`
+      o
+
+It create a change request. If set with `create-and-close`
+it will change the state of the request to implemented and
+after running the upgrade/update deployment it closes any
+change task associated to the change request.
 
 **backup**
 

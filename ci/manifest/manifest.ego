@@ -210,7 +210,10 @@ jobs:
       SNOW_PASSWORD: (( grab meta.<%= env.Name %>.service_now.password ))
       SNOW_API_URL: (( grab meta.<%= env.Name %>.service_now.api_url ))
 
-      RUNNING_ESTIMATED_TIME: 1
+      RUNNING_ESTIMATED_TIME: (( grab meta.service_now.running_estimated_time || "1 hour" ))
+
+      DRY_RUN: (( grab meta.<%= env.Name %>.dry_run || false ))
+
     <% if env.Feature("service_now") == "create-and-close" { %>
       SNOW_ACCEPT_CHANGE_REQUEST:  true
     <% } %>

@@ -38,7 +38,7 @@ function generate_payload(){
 
   CONCOURSE_URL="https:\/\/atc_external_url\/teams\/$BUILD_TEAM_NAME\/pipelines\/$BUILD_PIPELINE_NAME\/jobs\/$BUILD_JOB_NAME\/builds\/$BUILD_NAME"
   START_DATE=`date '+%Y-%m-%d %T'`
-  END_DATE=`date '+%Y-%m-%d %T' -d "+$RUNNING_ESTIMATED_TIME hour"`
+  END_DATE=`date '+%Y-%m-%d %T' -d "+$RUNNING_ESTIMATED_TIME"`
 
   mkdir -p output
 

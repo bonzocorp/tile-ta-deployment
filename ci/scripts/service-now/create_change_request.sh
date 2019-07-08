@@ -25,7 +25,7 @@ function create_change_request(){
     -d @$CREATE_PAYLOAD \
     $CHANGE_REQUEST_URL > output/create_response.json
 
-  return $(cat output/create_response.json | jq -r ".result.sys_id")
+  cat output/create_response.json | jq -r ".result.sys_id"
 }
 
 function generate_payload(){

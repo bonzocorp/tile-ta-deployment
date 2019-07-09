@@ -212,7 +212,7 @@ jobs:
 
       RUNNING_ESTIMATED_TIME: (( grab meta.service_now.running_estimated_time || "1 hour" ))
 
-      DRY_RUN: (( grab meta.<%= env.Name %>.dry_run || false ))
+      DRY_RUN: (( grab meta.<%= env.Name %>.service_now.dry_run || false ))
 
     <% if env.Feature("service_now") == "create-and-close" { %>
       SNOW_ACCEPT_CHANGE_REQUEST:  true

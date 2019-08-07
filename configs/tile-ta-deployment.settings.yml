@@ -1,0 +1,88 @@
+meta:
+  name: (( grab meta.product_name || null ))
+
+  debug: true
+  slack_updates:
+    username: concourse-bot
+    uri: SLACK_HOOK_URL
+    channel: #CHANNEL_NAME
+    icon_url: SOME_IMAGE_URL
+    success:
+      icon_url: SOME_IMAGE_URL
+    failure:
+      icon_url: SOME_IMAGE_URL
+
+
+  deploy_defaults:
+    om_skip_ssl_validation:      false
+    om_client_id:                ""
+    om_client_secret:            ""
+    om_trace:                    false
+    om_format:                   "json"
+
+  git:
+    username: bot-ci
+    email: some@email.com
+
+  configs:
+    uri:                      CONFIGS_GIT_URL
+    private_key:              (( vault "secret/YOUR_TEAM/git/private_key:value" ))
+    branch:                   dev
+
+  locks:
+    pool:                     bosh-pcf
+    uri:                      LOCKS_GIT_URL
+    private_key:              (( vault "secret/YOUR_TEAM/git/private_key:value" ))
+    branch:                   dev
+
+  pivnet_token:               (( vault "secret/YOUR_TEAM/pivnet_token:value" ))
+
+  iaas_type:                  vsphere
+
+  vault:
+    address:                  VAULT_URL
+    token:                    VAULT_TOKEN
+
+  pins_file: (( concat "config/default/" meta.name "/pins.yml" ))
+
+  concourse:
+    target: CONCOURS$E_URL
+    user: (( vault "secret/YOUR_TEAM/concourse/ENV/basic_auth/identity:value" ))
+    password: (( vault "secret/YOUR_TEAM/concourse/ENV/basic_auth/password:value" ))
+    team: main
+
+  custom_root_ca:              (( vault "secret/YOUR_TEAM/certificates/root-ca:value" ))
+  custom_intermediate_ca:      (( vault "secret/YOUR_TEAM/certificates/intermediate-ca:value" ))
+
+  SOME_ENV:
+    woot: (( inject meta.deploy_defaults ))
+    debug: true
+    om_target:                   OPSMAN_URL
+    om_username:                 (( vault "secret/your_team/opsman/SOME_ENV/opsman_admin_username:value" ))
+    om_password:                 (( vault "secret/your_team/opsman/SOME_ENV/opsman_admin_password:value" ))
+
+    # To sanitize opsman secrets and commit them to git in an store.yml file
+    yaml2vault_prefix: (( concat "secret/your_team/" meta.name "/SOME_ENV" ))
+    store_file: (( concat "config/SOME_ENV/" meta.name "/store.yml" ))
+
+    network_config: (( concat "config/default/" meta.name "/network.yml config/SOME_ENV/" meta.name "/network.yml" ))
+
+    resources_config: (( concat "config/default/" meta.name "/resources.yml config/SOME_ENV/" meta.name "/resources.yml" ))
+
+    properties_config: (( concat "config/default/" meta.name "/properties.yml config/SOME_ENV/" meta.name "/properties.yml" ))
+
+    errands_config: (( concat "config/default/" meta.name "/errands.yml" ))
+
+
+    bosh_target:                 bosh_target_ip
+    bosh_client:                 (( vault "secret/YOUR_TEAM/pcf-bosh/SOME_ENV/bosh_commandline_credentials/client_id:value" ))
+    bosh_client_secret:          (( vault "secret/YOUR_TEAM/pcf-bosh/SOME_ENV/bosh_commandline_credentials/client_secret:value" ))
+    bosh_ca_cert:                (( vault "secret/YOUR_TEAM/pcf-bosh/SOME_ENV/bosh_certificate/cert_pem:value" ))
+    bbr_ssh_key:                 (( vault "secret/YOUR_TEAM/director/SOME_ENV/.director.bbr_ssh_credentials:private_key_pem" ))
+    bbr_username:                (( vault "secret/YOUR_TEAM/pcf-bosh/SOME_ENV/bbr_ssh_credentials/identity:value" ))
+
+    service_now:
+      api_url: https://SERVICE_NOW_URL/api
+      username: (( vault "secret/your_team/snow/user:id" ))
+      password: (( vault "secret/your_team/snow/user:password" ))
+      create_change_record_payload: config/SOME_ENV/service_now/create_change_record.json

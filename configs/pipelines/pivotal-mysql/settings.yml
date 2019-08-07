@@ -1,0 +1,10 @@
+---
+###
+#
+##
+
+meta:
+  product_slug:               pivotal-mysql
+  product_name:               pivotal-mysql
+  glob:                       pivotal-mysql*.pivotal
+

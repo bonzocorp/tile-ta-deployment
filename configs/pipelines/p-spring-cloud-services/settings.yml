@@ -1,0 +1,11 @@
+---
+###
+#
+##
+
+meta:
+  name: p-spring-cloud-services
+
+  product_slug:               p-spring-cloud-services
+  product_name:               p_spring-cloud-services
+  glob:                       '*.pivotal'

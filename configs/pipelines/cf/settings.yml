@@ -1,0 +1,17 @@
+---
+###
+#
+##
+
+meta:
+  product_slug:               elastic-runtime
+  product_name:               cf
+
+  glob:                       cf-*.pivotal
+
+###
+# Some env
+##
+  some_env:
+    deployment_name:             cf-SOME_GUID
+

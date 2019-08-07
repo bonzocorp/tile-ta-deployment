@@ -1,0 +1,12 @@
+---
+###
+#
+##
+
+meta:
+  locks:
+    pool:                     pcf-bosh
+
+  product_slug:               p-rabbitmq
+  product_name:               p-rabbitmq
+  glob:                       p-rabbitmq*.pivotal

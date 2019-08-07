@@ -1,0 +1,13 @@
+---
+name: pas-windows
+git_project: https://github.com/bonzofenix/tile-ta-deployment.git
+features:
+  tile_updates: true
+  pin_versions: true
+  slack_updates: true
+
+envs:
+- name: some_env
+  features:
+    artifactory: true
+    allow_destroy: true

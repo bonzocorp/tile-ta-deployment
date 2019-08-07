@@ -1,0 +1,12 @@
+---
+###
+#
+##
+
+meta:
+  name: apm
+
+  product_slug:               apm
+  product_name:               apmPostgres
+  glob:                       '*.pivotal'
+

@@ -1,0 +1,10 @@
+---
+###
+#
+##
+
+meta:
+  product_slug:               p-isolation-segment
+  product_name:               p-isolation-segment-ext
+  replicator_name:            ext
+  glob:                       p-isolation-segment*.pivotal

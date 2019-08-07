@@ -1,0 +1,13 @@
+---
+###
+#
+##
+
+meta:
+  product_slug:               pas-windows
+  product_name:               (( grab meta.product_slug ))
+
+  glob:                       '*.pivotal'
+
+  windows:                    true
+

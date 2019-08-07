@@ -1,0 +1,23 @@
+---
+name: p-spring-cloud-services
+git_project: https://github.com/bonzofenix/tile-ta-deployment.git
+
+features:
+  slack_updates: true
+  pin_versions: true
+  deployment_updates: true
+
+envs:
+- name: some_env
+  features:
+    allow_destroy: true
+    slack_updates: true
+- name: nonprod
+  depends_on:
+  - sandbox
+- name: prod
+  depends_on:
+  - nonprod
+- name: dr
+  depends_on:
+  - nonprod

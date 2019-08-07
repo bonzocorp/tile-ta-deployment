@@ -1,0 +1,13 @@
+---
+name: apm
+
+features:
+  tile_updates: true
+  pin_versions: true
+  slack_updates: true
+
+git_project: https://github.com/bonzofenix/tile-ta-deployment.git
+envs:
+- name: some_env
+  features:
+    allow_destroy: true

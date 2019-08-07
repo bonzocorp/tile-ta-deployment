@@ -1,0 +1,9 @@
+---
+###
+#
+##
+
+meta:
+  product_slug:               p-redis
+  product_name:               p-redis
+  glob:                       p-redis*.pivotal

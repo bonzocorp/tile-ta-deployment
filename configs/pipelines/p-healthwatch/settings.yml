@@ -7,13 +7,3 @@ meta:
   product_slug:               p-healthwatch
   product_name:               p-healthwatch
   glob:                       '*.pivotal'
-
-###
-# some env
-##
-  some_env:
-    resources_config: >-
-      config/default/p-healthwatch/resources.yml
-
-    errands_config: >-
-      config/default/p-healthwatch/errands.yml

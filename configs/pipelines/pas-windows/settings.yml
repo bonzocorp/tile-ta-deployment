@@ -11,3 +11,7 @@ meta:
 
   windows:                    true
 
+  # When artifactory_stemcell environment feature is enabled
+  artifactory_stemcell:
+    repository:               "/YOUR_TEAM/windows-stemcells"
+    regex:                    "bosh-stemcell-(?<version>.*).tgz"

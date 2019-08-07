@@ -12,12 +12,11 @@ meta:
     failure:
       icon_url: SOME_IMAGE_URL
 
-  artifactory:
-    endpoint:                 https://ARTIFACTORY_URL/artifactory
-    repository:               "/YOUR_TEAM/windows-stemcells"
-    regex:                    "bosh-stemcell-(?<version>.*).tgz"
-    username:                 (( vault "secret/YOUR_TEAM/artifactory/artifactory_username:value" ))
-    password:                 (( vault "secret/YOUR_TEAM/artifactory/artifactory_password:value" ))
+  # Uncomment When artifactory_stemcell environment feature is enabled
+  # artifactory_stemcell:
+  #   endpoint:                 https://ARTIFACTORY_URL/artifactory
+  #   username:                 (( vault "secret/YOUR_TEAM/artifactory/artifactory_username:value" ))
+  #   password:                 (( vault "secret/YOUR_TEAM/artifactory/artifactory_password:value" ))
 
   deploy_defaults:
     om_skip_ssl_validation:      false

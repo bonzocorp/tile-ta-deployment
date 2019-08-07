@@ -504,11 +504,11 @@ resources:
 - name: stemcell
   type: artifactory
   source:
-    endpoint:         (( grab meta.artifactory.endpoint || "/" ))
-    repository:       (( grab meta.artifactory.repository || "" ))
-    regex:            (( grab meta.artifactory.regex || "*" ))
-    username:         (( grab meta.artifactory.username ))
-    password:         (( grab meta.artifactory.password ))
+    endpoint:         (( grab meta.artifactory_stemcell.endpoint || "/" ))
+    repository:       (( grab meta.artifactory_stemcell.repository || "" ))
+    regex:            (( grab meta.artifactory_stemcell.regex || "*" ))
+    username:         (( grab meta.artifactory_stemcell.username ))
+    password:         (( grab meta.artifactory_stemcell.password ))
 <% } %>
 
 resource_types:

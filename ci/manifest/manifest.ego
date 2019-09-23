@@ -118,6 +118,9 @@ jobs:
     - get: config
       resource: <%= config.Name %>-pins
       trigger: true
+      params:
+        submodules: (( grab meta.git.submodules || "none" ))
+        submodule_recursive: false
   - task: run
     file: pipeline/ci/tasks/pin-resources.yml
     params:
@@ -161,6 +164,9 @@ jobs:
       <% } %>
     - get: config
       resource: <%= env.Name %>-config
+      params:
+        submodules: (( grab meta.git.submodules || "none" ))
+        submodule_recursive: false
     - get: metadata
     - put: lock
       params:
@@ -305,6 +311,9 @@ jobs:
       <% } %>
     - get: config
       resource: <%= env.Name %>-config
+      params:
+        submodules: (( grab meta.git.submodules || "none" ))
+        submodule_recursive: false
     - get: metadata
     - put: lock
       params:
@@ -357,6 +366,9 @@ jobs:
     <% } %>
     - get: config
       resource: <%= env.Name %>-config
+      params:
+        submodules: (( grab meta.git.submodules || "none" ))
+        submodule_recursive: false
     - put: lock
       params:
         claim: <%= env.Name %>
@@ -395,6 +407,9 @@ jobs:
         claim: <%= env.Name %>
     - get: config
       resource: <%= env.Name %>-config
+      params:
+        submodules: (( grab meta.git.submodules || "none" ))
+        submodule_recursive: false
     - get: backup
       resource: <%= env.Name %>-<%= config.Name %>-s3-backup
       params:

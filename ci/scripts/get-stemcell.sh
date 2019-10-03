@@ -79,9 +79,9 @@ function download_stemcell() {
     cat $metadata_file |
     jq --raw-output \
       '
-    if any(.Dependencies[]; select(.Release.Product.Name | contains("Stemcells for PCF (Windows)"))) then
+    if any(.Dependencies[]; select(.Release.Product.Name | contains("Pivotal Stemcells (Windows)"))) then
       "stemcells-windows-server"
-    elif any(.Dependencies[]; select(.Release.Product.Name | contains("Stemcells for PCF (Ubuntu Xenial)"))) then
+    elif any(.Dependencies[]; select(.Release.Product.Name | contains("Pivotal Stemcells (Ubuntu Xenial)"))) then
       "stemcells-ubuntu-xenial"
     else
       "stemcells"

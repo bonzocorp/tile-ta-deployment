@@ -15,8 +15,6 @@ function get_version_id(){
   echo $version_id
 }
 
-function get_versions
-
 function pin_versions(){
   while read pin; do
     resource_name=$(echo $pin | cut -d':' -f1)

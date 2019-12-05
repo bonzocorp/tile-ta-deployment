@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bonzofenix/ubuntu-ci-tools
+    tag: edge
+
+
+inputs:
+  - name: pipeline
+  - name: current-tile
+  - name: latest-tile
+  - name: metadata
+
+outputs:
+  - name: output      # For debugging purposes, uncommeny
+
+run:
+  path: pipeline/ci/scripts/tile-version-notification.sh

@@ -97,17 +97,29 @@ jobs:
 <% if config.HasFeature("slack_updates") { %>
 - name: tile-updates
   plan:
-  - get: <%= config.Name %>-new-tile
+  - in_parallel:
+    - get: pipeline
+    - get: metadata
+    - get: current-tile
+      resource: <%= config.Name %>-tile
+      params:
+        globs: []
+    - get: latest-tile
+      resource: <%= config.Name %>-latest-tile
+      params:
+        globs: []
+      trigger: true
+  - task: tile-version-notification
+    file: pipeline/ci/tasks/tile-version-notification.yml
     params:
-      globs: []
-    trigger: true
+      PRODUCT_NAME:        (( grab meta.product_name ))
     on_success:
       put: notify
       params:
         channel:  (( grab meta.slack_updates.channel ))
         username: (( grab meta.slack_updates.username ))
         icon_url: (( grab meta.slack_updates.icon_url ))
-        text: "New <%= config.Name %> tile available"
+        text_file: output/tile_version_notification
 <% } %>
 
 <% if config.HasFeature("pin_versions") { %>
@@ -382,6 +394,7 @@ jobs:
      task: cleanup-<%= config.Name %>
      file: pipeline/ci/tasks/cleanup.yml
     params:
+      foo: bar
       DEBUG:               (( grab meta.<%= env.Name %>.debug || false ))
       BOSH_TARGET:         (( grab meta.<%= env.Name %>.bosh_target ))
       BOSH_CLIENT:         (( grab meta.<%= env.Name %>.bosh_client ))
@@ -459,7 +472,7 @@ resources:
   type: build-metadata
 
 <% if config.HasFeature("slack_updates") { %>
-- name: <%= config.Name %>-new-tile
+- name: <%= config.Name %>-latest-tile
   type: pivnet
   source:
     api_token:    (( grab meta.pivnet_token ))

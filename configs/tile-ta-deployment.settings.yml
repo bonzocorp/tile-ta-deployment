@@ -1,7 +1,6 @@
 meta:
   name: (( grab meta.product_name || null ))
 
-  debug: true
   slack_updates:
     username: concourse-bot
     uri: SLACK_HOOK_URL
@@ -22,20 +21,20 @@ meta:
 
   git:
     username: bot-ci
-    email: some@email.com
+    email: ci@concourse.com
 
   configs:
     uri:                      CONFIGS_GIT_URL
-    private_key:              (( vault "secret/YOUR_TEAM/git/private_key:value" ))
+    private_key:              ((git/private_key))
     branch:                   dev
 
   locks:
     pool:                     bosh-pcf
     uri:                      LOCKS_GIT_URL
-    private_key:              (( vault "secret/YOUR_TEAM/git/private_key:value" ))
+    private_key:              ((git/private_key))
     branch:                   dev
 
-  pivnet_token:               (( vault "secret/YOUR_TEAM/pivnet_token:value" ))
+  pivnet_token:               ((pivnet_token))
 
   iaas_type:                  vsphere
 
@@ -47,19 +46,19 @@ meta:
 
   concourse:
     target: CONCOURS$E_URL
-    user: (( vault "secret/YOUR_TEAM/concourse/ENV/basic_auth/identity:value" ))
-    password: (( vault "secret/YOUR_TEAM/concourse/ENV/basic_auth/password:value" ))
+    user: ((concourse/ENV/basic_auth/identity))
+    password: ((concourse/ENV/basic_auth/password))
     team: main
 
-  custom_root_ca:              (( vault "secret/YOUR_TEAM/certificates/root-ca:value" ))
-  custom_intermediate_ca:      (( vault "secret/YOUR_TEAM/certificates/intermediate-ca:value" ))
+  custom_root_ca:              ((certificates/aon-root-ca))
+  custom_intermediate_ca:      ((certificates/aon-intermediate-ca))
 
   SOME_ENV:
     woot: (( inject meta.deploy_defaults ))
     debug: true
     om_target:                   OPSMAN_URL
-    om_username:                 (( vault "secret/your_team/opsman/SOME_ENV/opsman_admin_username:value" ))
-    om_password:                 (( vault "secret/your_team/opsman/SOME_ENV/opsman_admin_password:value" ))
+    om_username:                 ((opsman/ENV/opsman_admin_username))
+    om_password:                 ((opsman/ENV/opsman_admin_password))
 
     # To sanitize opsman secrets and commit them to git in an store.yml file
     yaml2vault_prefix: (( concat "secret/your_team/" meta.name "/SOME_ENV" ))

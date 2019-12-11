@@ -14,10 +14,18 @@ latest=$(cat latest-tile/version)
 current="${current/\#*/}"
 latest="${latest/\#*/}"
 
+notification=output/tile_version_notification
+pending_upgrades=output/pending_upgrades
 
-cat <<EOT >> output/tile_version_notification
-New tile v${latest} for ${PRODUCT_NAME} is available.
-Currently running v${current}
-<${url}/teams/${team}/pipelines/${pipeline} |Go to pipeline>
-EOT
+echo "${PRODUCT_NAME} tile status notification:" >> $notification
+if [[ $current  == $latest ]]; then
+  echo "Tile \`${release}\` up to date at *v${latest}*." >> $notification
+else
+  echo "New \`${release}\` *v${latest}* is available. Currently running *v${current}*" >> $notification
+  echo "${release},${current},${latest}" 																							 >> $pending_upgrades
+fi
 
+
+echo "<${url}/teams/${team}/pipelines/${pipeline} |Go to pipeline>" >> $notification
+
+exit 0

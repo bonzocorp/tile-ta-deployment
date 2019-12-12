@@ -15,6 +15,7 @@
 #   Joe Goller;  joe.goller@gmail.com
 
 meta:
+  name: <%= config.Name %>
   pipeline:
     uri: https://github.com/bonzofenix/tile-ta-deployment
 

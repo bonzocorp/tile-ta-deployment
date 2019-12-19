@@ -8,16 +8,18 @@ source pipeline/ci/scripts/common.sh
 function generate_config() {
   log "Generating config files ..."
 
-  find_or_create "$NETWORK_CONFIG $PROPERTIES_CONFIG $RESOURCES_CONFIG"
 
+  find_or_create $NETWORK_CONFIG
   spruce merge --prune meta $NETWORK_CONFIG    2>/dev/null | spruce json 2>/dev/null > $OUTPUT/network.json
+
+  find_or_create $PROPERTIES_CONFIG
   spruce merge --prune meta $PROPERTIES_CONFIG 2>/dev/null | spruce json 2>/dev/null > $OUTPUT/properties.json
+
+  find_or_create $RESOURCES_CONFIG
   spruce merge --prune meta $RESOURCES_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/resources.json
 
-  if [ -n "$ERRANDS_CONFIG" ]; then
-    find_or_create $ERRANDS_CONFIG
-    spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/errands.json
-  fi
+  find_or_create $ERRANDS_CONFIG
+  spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/errands.json
 }
 
 function upload_stemcell() {

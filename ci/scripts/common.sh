@@ -66,17 +66,6 @@ function check_if_exists(){
   fi
 }
 
-function find_or_create(){
-  files=$1
-
-  for file in $files; do
-    if [ ! -f "$file" ]; then
-      warning "$file is empty; skipping merge of this file"
-      echo -e "---\n{}" > $file
-    fi
-  done
-}
-
 function apply_changes() {
   product_guid="$(get_product_guid)"
 

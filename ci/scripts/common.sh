@@ -135,6 +135,16 @@ function get_installation_status() {
   | jq -r '.status'
 }
 
+function find_or_create() {
+  for file in "$@"; do
+    basedir=$(dirname "$file")
+    mkdir -p $basedir
+    if [[ ! -s "$file" ]] ; then
+      echo -e "---\n{}" > $file
+    fi
+  done
+}
+
 function get_product_guid() {
   om -t $OM_TARGET \
     $om_options \

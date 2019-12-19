@@ -15,6 +15,7 @@ function generate_config() {
   spruce merge --prune meta $RESOURCES_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/resources.json
 
   if [ -n "$ERRANDS_CONFIG" ]; then
+    find_or_create $ERRANDS_CONFIG
     spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/errands.json
   fi
 }

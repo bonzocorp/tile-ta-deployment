@@ -1,7 +1,6 @@
 #!/bin/bash
 
 exec >&2
-set -e
 
 source pipeline/ci/scripts/common.sh
 

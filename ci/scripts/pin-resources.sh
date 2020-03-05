@@ -9,7 +9,7 @@ function authenticate_concourse(){
 }
 function get_version_id(){
   regex=$1
-  versions_response="$(fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions -- -k)"
+  versions_response="$(fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions '' -- -k)"
   version_id=$(echo $versions_response | jq -r ".[] | select(.version.product_version | contains(\"$version_regex\")) | .id")
   echo $version_id
 }
@@ -21,14 +21,19 @@ function pin_versions(){
 
     if [[ -z "$(get_version_id $version_regex)" ]]; then
       fly -t concourse check-resource -r $PIPELINE_NAME/$resource_name -f product_version:$version_regex
-      sleep 20
     fi
 
+  done < $PINS_FILE
+
+  sleep 30
+
+  while read pin; do
+    version_regex=$(echo $pin | cut -d':' -f2 | tr -d '[:space:]')
     version_id="$(get_version_id $version_regex)"
 
     log "Pinning $resource_name with version matching: $version_regex"
-    fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/unpin -- -k -X PUT
-    fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions/$version_id/pin -- -k -X PUT
+    fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/unpin '' -- -k -X PUT
+    fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions/$version_id/pin '' -- -k -X PUT
   done < $PINS_FILE
 }
 

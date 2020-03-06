@@ -1,13 +1,9 @@
 #!/bin/bash
 
-exec >&2
-set -e
-
 source pipeline/ci/scripts/common.sh
 
 function generate_config() {
   log "Generating config files ..."
-
 
   find_or_create $NETWORK_CONFIG
   spruce merge --prune meta $NETWORK_CONFIG    2>/dev/null | spruce json 2>/dev/null > $OUTPUT/network.json

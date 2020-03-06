@@ -1,26 +1,20 @@
 #!/bin/bash
 
-exec >&2
-set -e
-
-[[ "${DEBUG,,}" == "true" ]] && set -x && env
-
-source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/common.sh
+source pipeline/ci/scripts/common.sh
 
 function backup() {
 
   local output_dir=$PWD/output
   local build_dir=$PWD/build
+  local bbr_ssh_key_file="$build_dir/bbr.pem"
+  local bosh_ca_cert_file="$build_dir/bosh-ca.crt"
 
   mkdir -p $build_dir/backup
 
-  echo "$BOSH_CA_CERT" >> $build_dir/bosh-ca.crt
-  echo "$BBR_SSH_KEY" >> $build_dir/bbr.pem
+  echo "$BOSH_CA_CERT" >> $bosh_ca_cert_file
+  echo "$BBR_SSH_KEY" >> $bbr_ssh_key_file
 
   echo "DEPLOYMENT NAME:  $DEPLOYMENT_NAME"
-
-  local bosh_ca_cert_file="$build_dir/bosh-ca.crt"
-  local bbr_ssh_key_file="$build_dir/bbr.pem"
 
   local deployment_command="
     bbr deployment

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/common.sh
+source pipeline/ci/scripts/common.sh
 
 function cleanup() {
   local bosh_ca_cert_file=$BUILD_DIR/bosh-ca.crt

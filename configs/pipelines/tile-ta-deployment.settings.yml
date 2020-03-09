@@ -19,7 +19,7 @@ meta:
   #   password:                 (( vault "secret/YOUR_TEAM/artifactory/artifactory_password:value" ))
 
   deploy_defaults:
-    om_skip_ssl_validation:      false
+    om_skip_ssl_validation:      true
     om_client_id:                ""
     om_client_secret:            ""
     om_trace:                    false

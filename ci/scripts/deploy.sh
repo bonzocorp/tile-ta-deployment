@@ -166,18 +166,60 @@ function configure_product() {
 }
 
 function configure_errands() {
-  if [[ -f $OUTPUT/errands.json ]]; then
-    log "Configuring product errands"
-    cat $OUTPUT/errands.json \
-      | jq -r '.errands | .[] | to_entries | "--errand-name \(.[0].value) --\(.[1].key)-state \(.[1].value)"' \
-      | while read err_cmd; do
-        cmd="om -t $OM_TARGET $om_options set-errand-state --product-name $PRODUCT_NAME $err_cmd"
-        log "Running command: $cmd"
-        eval $cmd
-      done
+  errand_state=""
+  name=""
+  product_guid=$(get_product_guid)
+  current_product_version=$(cat ./tile/version | sed 's/#.*//')
+  current_product_version=$( om -t $OM_TARGET $om_options available-products --format json | \
+    jq -r --arg PRODUCT_VERSION "$product_version" --arg PRODUCT_NAME "$PRODUCT_NAME" \
+    '.[] | select(.name == $PRODUCT_NAME and (.version | test($PRODUCT_VERSION; "i"))) | .version'
+  )
+  new_product_version=$(om -t opsman.cf-sandbox.aon.com -u admin -p password1 curl --path /api/v0/deployed/$product_guid | jq -r '.product_version' | sed 's/-.*//')
+
+  #Set errands to run only if upgrading version
+  if [ "$current_product_version" == "$new_product_version" ]; then
+    errand_state=false
   else
-    log "No errands configuration found"
+    errand_state=true
   fi
+
+  om -t $OM_TARGET $om_options \
+    curl --path /api/v0/staged/products/$product_guid/errands \
+    | jq -r '.errands[]' \
+    > $OUTPUT/errands.json
+
+  jq -c '' $OUTPUT/errands.json | while read i; do
+    name=`echo $i | jq '.name' -r`
+
+    if [ $(echo $i | jq -e 'has("post_deploy")') == true ]; then
+      om -t $OM_TARGET $om_options \
+      curl --path /api/v0/staged/products/$product_guid/errands \
+      -x PUT \
+      -H "Content-Type: application/json" \
+      -d '{
+            "errands": [
+              {
+                "name": "'"${name}"'",
+                "post_deploy": '$errand_state'
+              }
+            ]
+          }'
+    elif [ $(echo $i | jq -e 'has("pre_delete")') == true ]; then
+      om -t $OM_TARGET $om_options \
+      curl --path /api/v0/staged/products/$product_guid/errands \
+      -x PUT \
+      -H "Content-Type: application/json" \
+      -d '{
+            "errands": [
+              {
+                "name": "'"${name}"'",
+                "pre_delete": '$errand_state'
+              }
+            ]
+          }'
+    fi
+  done
+
 }
 
 function commit_config(){

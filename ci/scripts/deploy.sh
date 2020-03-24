@@ -166,6 +166,8 @@ function configure_product() {
 }
 
 function configure_errands() {
+  log "Configuring errands"
+
   errand_state=""
   name=""
   product_guid=$(get_product_guid)
@@ -174,7 +176,7 @@ function configure_errands() {
     jq -r --arg PRODUCT_VERSION "$product_version" --arg PRODUCT_NAME "$PRODUCT_NAME" \
     '.[] | select(.name == $PRODUCT_NAME and (.version | test($PRODUCT_VERSION; "i"))) | .version'
   )
-  new_product_version=$(om -t opsman.cf-sandbox.aon.com -u admin -p password1 curl --path /api/v0/deployed/$product_guid | jq -r '.product_version' | sed 's/-.*//')
+  new_product_version=$(om -t $OM_TARGET $om_options curl --path /api/v0/deployed/products/$product_guid | jq -r '.product_version' | sed 's/-.*//')
 
   #Set errands to run only if upgrading version
   if [ "$current_product_version" == "$new_product_version" ]; then

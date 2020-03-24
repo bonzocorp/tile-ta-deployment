@@ -6,6 +6,8 @@ set -e
 source pipeline/ci/scripts/common.sh
 
 function configure_errands() {
+  log "Configuring errands"
+
   name=""
   product_guid=$(get_product_guid)
 

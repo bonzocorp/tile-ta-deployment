@@ -171,12 +171,8 @@ function configure_errands() {
   errand_state=""
   name=""
   product_guid=$(get_product_guid)
-  current_product_version=$(cat ./tile/version | sed 's/#.*//')
-  current_product_version=$( om -t $OM_TARGET $om_options available-products --format json | \
-    jq -r --arg PRODUCT_VERSION "$product_version" --arg PRODUCT_NAME "$PRODUCT_NAME" \
-    '.[] | select(.name == $PRODUCT_NAME and (.version | test($PRODUCT_VERSION; "i"))) | .version'
-  )
-  new_product_version=$(om -t $OM_TARGET $om_options curl --path /api/v0/deployed/products/$product_guid | jq -r '.product_version' | sed 's/-.*//')
+  current_product_version=$(om -t $OM_TARGET $om_options curl --path /api/v0/deployed/products/$product_guid | jq -r '.product_version' | sed 's/-.*//')
+  new_product_version=$(cat ./tile/version | sed 's/#.*//')
 
   #Set errands to run only if upgrading version
   if [ "$current_product_version" == "$new_product_version" ]; then

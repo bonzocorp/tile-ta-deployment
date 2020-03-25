@@ -184,6 +184,7 @@ function configure_errands() {
     else
       #first time deployment
       errand_state=true
+    fi
 
   else
     #existing product and new version

@@ -168,27 +168,15 @@ function configure_product() {
 function configure_errands() {
   log "Configuring errands"
 
-  errand_state=""
+  errand_state=true
   name=""
   product_guid=$(get_product_guid)
-  current_product_version=$(om -t $OM_TARGET $om_options curl --path /api/v0/deployed/products/$product_guid | jq -r '.product_version' | sed 's/-.*//')
   new_product_version=$(cat ./tile/version | sed 's/#.*//')
 
-  #Set errands to run only if upgrading version
-  if [ "$current_product_version" == "$new_product_version" ]; then
+  #disable errands if existing deployment with same version
+  if [ $(om -t $OM_TARGET $om_options deployed-products --format json | jq -r '.[] | select( .name == "'${PRODUCT_NAME}'" ) | .version') == "$new_product_version" ]; then
     #existing product and same version
-
-    if [ $(om -t $OM_TARGET $om_options deployed-products --format json | jq -r '.[] | .name' | grep "$PRODUCT_NAME") ]; then
-      #product already deployed - no version change
-      errand_state=false
-    else
-      #first time deployment
-      errand_state=true
-    fi
-
-  else
-    #existing product and new version
-    errand_state=true
+    errand_state=false
   fi
 
   om -t $OM_TARGET $om_options \

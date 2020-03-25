@@ -176,8 +176,17 @@ function configure_errands() {
 
   #Set errands to run only if upgrading version
   if [ "$current_product_version" == "$new_product_version" ]; then
+    #existing product and same version
     errand_state=false
+
+    for product in $(om -t $OM_TARGET $om_options deployed-products --format json | jq -r '.[] | .name'); do
+      #capture if first deployment of the product
+      if [ ${product} == "$PRODUCT_NAME" && !${errand_state} ]; then
+        errand_state=true
+      fi
+    done
   else
+    #existing product and new version
     errand_state=true
   fi
 

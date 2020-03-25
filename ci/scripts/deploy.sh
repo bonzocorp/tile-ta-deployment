@@ -181,7 +181,7 @@ function configure_errands() {
 
     for product in $(om -t $OM_TARGET $om_options deployed-products --format json | jq -r '.[] | .name'); do
       #capture if first deployment of the product
-      if [ ${product} == "$PRODUCT_NAME" && !${errand_state} ]; then
+      if [ ${product} == "$PRODUCT_NAME" ] && [ !${errand_state} ]; then
         errand_state=true
       fi
     done

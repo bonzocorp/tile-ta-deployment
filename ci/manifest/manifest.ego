@@ -108,9 +108,9 @@ jobs:
     on_success:
       put: notify
       params:
-        channel:  (( grab meta.slack_updates.channel ))
-        username: (( grab meta.slack_updates.username ))
-        icon_url: (( grab meta.slack_updates.icon_url ))
+        channel:  (( grab meta.slack.updates.channel ))
+        username: (( grab meta.slack.username ))
+        icon_url: (( grab meta.slack.icon_url ))
         text_file: output/tile_version_notification
 <% } %>
 
@@ -247,9 +247,9 @@ jobs:
       <% if env.HasFeature("slack_updates") { %>
       - put: notify
         params:
-          channel:  (( grab meta.slack_updates.channel ))
-          username: (( grab meta.slack_updates.username ))
-          icon_url: (( grab meta.slack_updates.success.icon_url ))
+          channel:  (( grab meta.slack.updates.channel ))
+          username: (( grab meta.slack.username ))
+          icon_url: (( grab meta.slack.success.icon_url ))
           text: "Finish <%= config.Name %> tile deployment successfully"
       <% } %>
       <% if env.Feature("service_now") == "create-and-close" { %>
@@ -269,9 +269,9 @@ jobs:
       <% if env.HasFeature("slack_updates") { %>
       - put: notify
         params:
-          channel:  (( grab meta.slack_updates.channel ))
-          username: (( grab meta.slack_updates.username ))
-          icon_url: (( grab meta.slack_updates.failure.icon_url ))
+          channel:  (( grab meta.slack.updates.channel ))
+          username: (( grab meta.slack.username ))
+          icon_url: (( grab meta.slack.failure.icon_url ))
           text: "Finish <%= config.Name %> tile deployment with failure"
       <% } %>
       <% if env.Feature("service_now") == "create-and-close" { %>
@@ -435,7 +435,7 @@ resources:
 - name: notify
   type: slack-notification
   source:
-    url: (( grab meta.slack_updates.uri || "" ))
+    url: (( grab meta.slack.uri || "" ))
 <% } %>
 
 <% if config.HasFeature("pin_versions") { %>

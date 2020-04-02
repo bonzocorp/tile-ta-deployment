@@ -56,14 +56,8 @@ function error() {
 function generate_config() {
   log "Generating config files ..."
 
-  find_or_create $NETWORK_CONFIG
-  spruce merge --prune meta $NETWORK_CONFIG    2>/dev/null | spruce json 2>/dev/null > $OUTPUT/network.json
-
-  find_or_create $PROPERTIES_CONFIG
-  spruce merge --prune meta $PROPERTIES_CONFIG 2>/dev/null | spruce json 2>/dev/null > $OUTPUT/properties.json
-
-  find_or_create $RESOURCES_CONFIG
-  spruce merge --prune meta $RESOURCES_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/resources.json
+  find_or_create $PRODUCT_CONFIG
+  spruce merge --prune meta $PRODUCT_CONFIG  2>/dev/null > $OUTPUT/product_config.yml
 
   find_or_create $ERRANDS_CONFIG
   spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null > $OUTPUT/errands.yml

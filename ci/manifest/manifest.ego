@@ -232,9 +232,7 @@ jobs:
     params:
       <<: *<%= env.Name %>_deploy_params
       <<: *vault_params
-      NETWORK_CONFIG:      (( grab meta.<%= env.Name %>.network_config ))
-      PROPERTIES_CONFIG:   (( grab meta.<%= env.Name %>.properties_config ))
-      RESOURCES_CONFIG:    (( grab meta.<%= env.Name %>.resources_config ))
+      PRODUCT_CONFIG:      (( grab meta.<%= env.Name %>.product_config))
       ERRANDS_CONFIG:      (( grab meta.<%= env.Name %>.errands_config || "" ))
       PRODUCT_NAME:        (( grab meta.product_name ))
       REPLICATOR_NAME:     (( grab meta.replicator_name || "" ))

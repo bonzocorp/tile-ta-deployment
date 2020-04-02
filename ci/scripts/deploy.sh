@@ -144,10 +144,7 @@ function configure_product() {
   om -t $OM_TARGET \
     $om_options \
     configure-product \
-      --product-name "$PRODUCT_NAME" \
-      --product-network "$(cat $OUTPUT/network.json)" \
-      --product-resources "$(cat $OUTPUT/resources.json)" \
-      --product-properties "$(cat $OUTPUT/properties.json)"
+      -c $OUTPUT/product_config.yml
 }
 
 

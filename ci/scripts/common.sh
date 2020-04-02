@@ -66,7 +66,7 @@ function generate_config() {
   spruce merge --prune meta $RESOURCES_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/resources.json
 
   find_or_create $ERRANDS_CONFIG
-  spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null > $OUTPUT/errands.yaml
+  spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null > $OUTPUT/errands.yml
 }
 
 function check_if_exists(){
@@ -81,7 +81,7 @@ function check_if_exists(){
 
 function apply_changes() {
    om apply-changes  \
-      -c $output/errands.yml
+      -c $OUTPUT/errands.yml
       --product-name $PRODUCT_NAME
 }
 

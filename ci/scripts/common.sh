@@ -81,7 +81,7 @@ function check_if_exists(){
 
 function apply_changes() {
    om apply-changes  \
-      -c $OUTPUT/errands.yml
+      -c $OUTPUT/errands.yml \
       --product-name $PRODUCT_NAME
 }
 

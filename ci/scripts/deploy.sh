@@ -2,21 +2,6 @@
 
 source pipeline/ci/scripts/common.sh
 
-function generate_config() {
-  log "Generating config files ..."
-
-  find_or_create $NETWORK_CONFIG
-  spruce merge --prune meta $NETWORK_CONFIG    2>/dev/null | spruce json 2>/dev/null > $OUTPUT/network.json
-
-  find_or_create $PROPERTIES_CONFIG
-  spruce merge --prune meta $PROPERTIES_CONFIG 2>/dev/null | spruce json 2>/dev/null > $OUTPUT/properties.json
-
-  find_or_create $RESOURCES_CONFIG
-  spruce merge --prune meta $RESOURCES_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/resources.json
-
-  find_or_create $ERRANDS_CONFIG
-  spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/errands.json
-}
 
 function upload_stemcell() {
   stemcell_file_path=`find ./stemcell -name *.tgz | sort | head -1`
@@ -165,58 +150,6 @@ function configure_product() {
       --product-properties "$(cat $OUTPUT/properties.json)"
 }
 
-function configure_errands() {
-  log "Configuring errands"
-
-  errand_state=true
-  name=""
-  product_guid=$(get_product_guid)
-  new_product_version=$(cat ./tile/version | sed 's/#.*//')
-
-  #disable errands if existing deployment with same version
-  if [ $(om -t $OM_TARGET $om_options deployed-products --format json | jq -r '.[] | select( .name == "'${PRODUCT_NAME}'" ) | .version') == "$new_product_version" ]; then
-    #existing product and same version
-    errand_state=false
-  fi
-
-  om -t $OM_TARGET $om_options \
-    curl --path /api/v0/staged/products/$product_guid/errands \
-    | jq -r '.errands[]' \
-    > $OUTPUT/errands.json
-
-  jq -c '' $OUTPUT/errands.json | while read i; do
-    name=`echo $i | jq '.name' -r`
-
-    if [ $(echo $i | jq -e 'has("post_deploy")') == true ]; then
-      om -t $OM_TARGET $om_options \
-      curl --path /api/v0/staged/products/$product_guid/errands \
-      -x PUT \
-      -H "Content-Type: application/json" \
-      -d '{
-            "errands": [
-              {
-                "name": "'"${name}"'",
-                "post_deploy": '$errand_state'
-              }
-            ]
-          }'
-    elif [ $(echo $i | jq -e 'has("pre_delete")') == true ]; then
-      om -t $OM_TARGET $om_options \
-      curl --path /api/v0/staged/products/$product_guid/errands \
-      -x PUT \
-      -H "Content-Type: application/json" \
-      -d '{
-            "errands": [
-              {
-                "name": "'"${name}"'",
-                "pre_delete": '$errand_state'
-              }
-            ]
-          }'
-    fi
-  done
-
-}
 
 function commit_config(){
   BUILD_NAME=$(cat metadata/build-name)
@@ -248,7 +181,6 @@ function commit_config(){
 
 trap "commit_config" EXIT
 
-load_custom_ca_certs
 generate_config
 upload_stemcell
 replicate_product
@@ -256,7 +188,6 @@ winfs_inject_product
 upload_product
 stage_product
 configure_product
-configure_errands
 if [[ "${DRY_RUN,,}" != "true" ]] ; then
   apply_changes
   fetch_opsman_creds

@@ -53,6 +53,22 @@ function error() {
   exit 1
 }
 
+function generate_config() {
+  log "Generating config files ..."
+
+  find_or_create $NETWORK_CONFIG
+  spruce merge --prune meta $NETWORK_CONFIG    2>/dev/null | spruce json 2>/dev/null > $OUTPUT/network.json
+
+  find_or_create $PROPERTIES_CONFIG
+  spruce merge --prune meta $PROPERTIES_CONFIG 2>/dev/null | spruce json 2>/dev/null > $OUTPUT/properties.json
+
+  find_or_create $RESOURCES_CONFIG
+  spruce merge --prune meta $RESOURCES_CONFIG  2>/dev/null | spruce json 2>/dev/null > $OUTPUT/resources.json
+
+  find_or_create $ERRANDS_CONFIG
+  spruce merge --prune meta $ERRANDS_CONFIG  2>/dev/null > $OUTPUT/errands.yaml
+}
+
 function check_if_exists(){
   ERROR_MSG=$1
   CONTENT=$2
@@ -64,61 +80,9 @@ function check_if_exists(){
 }
 
 function apply_changes() {
-  product_guid="$(get_product_guid)"
-
-  installation_id=""
-  if [ -z "$product_guid" ];then
-    log "Applying changes"
-
-    installation_id=$(
-      om -t $OM_TARGET \
-        $om_options \
-        curl $CURL_OPTS \
-          --path /api/v0/installations \
-          --request POST | jq -r '.install.id'
-    )
-
-  else
-    log "Applying changes on $product_guid"
-    installation_id=$(
-      om -t $OM_TARGET \
-        $om_options \
-        curl \
-          --path /api/v0/installations \
-          --request POST \
-          --data '{"deploy_products": ["'$product_guid'"]}' \
-      | jq -r '.install.id'
-    )
-
-  fi
-  log "Watching installation $installation_id"
-
-  status=$( get_installation_status $installation_id )
-  while [[ $status == 'running' ]]; do
-    echo -n '.'
-    sleep 1
-
-    status=$( get_installation_status $installation_id )
-  done
-
-  echo "Installation $installation_id $status!"
-  echo "You can view logs at https://$OM_TARGET/installation_logs/$installation_id"
-  if [[ $status == succeeded ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-function get_installation_status() {
-  local id="$1"
-
-  om -t $OM_TARGET \
-    $om_options \
-    curl \
-      --path /api/v0/installations/$id \
-    2>/dev/null \
-  | jq -r '.status'
+   om apply-changes  \
+      -c $output/errands.yml
+      --product-name $PRODUCT_NAME
 }
 
 function find_or_create() {
@@ -129,14 +93,6 @@ function find_or_create() {
       echo -e "---\n{}" > $file
     fi
   done
-}
-
-function get_product_guid() {
-  om -t $OM_TARGET \
-    $om_options \
-    curl \
-      --path /api/v0/staged/products \
-  | jq -r '.[] | select(.type == "'$PRODUCT_NAME'") | .guid'
 }
 
 load_custom_ca_certs

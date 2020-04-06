@@ -79,6 +79,15 @@ function apply_changes() {
       --product-name $PRODUCT_NAME
 }
 
+function get_product_guid() {
+  om -t $OM_TARGET \
+    $om_options \
+    curl \
+      --path /api/v0/staged/products \
+  | jq -r '.[] | select(.type == "'$PRODUCT_NAME'") | .guid'
+}
+
+
 function find_or_create() {
   for file in "$@"; do
     basedir=$(dirname "$file")

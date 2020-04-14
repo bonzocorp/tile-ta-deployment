@@ -1,6 +1,11 @@
 #!/bin/bash
 
 exec >&2
+if [[ "${DEBUG,,}" == "true" ]]; then
+  set -x
+  echo "Environment Variables:"
+  env
+fi
 
 source pipeline/ci/scripts/common.sh
 

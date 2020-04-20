@@ -28,17 +28,10 @@ function pin_versions(){
       fly -t concourse check-resource -r $PIPELINE_NAME/$resource_name -f product_version:$version_regex
     fi
 
-  done < $PINS_FILE
-
-  sleep 30
-
-  while read pin; do
-    version_regex=$(echo $pin | cut -d':' -f2 | tr -d '[:space:]')
-    version_id="$(get_version_id $version_regex)"
-
     log "Pinning $resource_name with version matching: $version_regex"
     fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/unpin '' -- -k -X PUT
     fly -t concourse curl /api/v1/teams/$CONCOURSE_TEAM/pipelines/$PIPELINE_NAME/resources/$resource_name/versions/$version_id/pin '' -- -k -X PUT
+
   done < $PINS_FILE
 }
 

@@ -321,9 +321,10 @@ jobs:
   plan:
   - in_parallel:
     - get: pipeline
-    <% if env.HasFeature("backup-daily") { %>
-    - trigger: true
-      get: every-day
+    <% if env.Feature("backup") == "backup_daily" { %>
+    - get: every-day
+      params:
+        trigger: true
     <% } %>
     - get: config
       resource: <%= env.Name %>-config
@@ -465,7 +466,7 @@ resources:
     password:    (( grab meta.configs.password ))
     uri:         (( grab meta.configs.uri ))
 
-<% if env.HasFeature("backup-daily") { %>
+<% if env.Feature("backup") == "backup_daily" { %>
 - name: every-day
   type: time
   source:

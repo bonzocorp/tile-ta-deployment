@@ -49,3 +49,6 @@ change task associated to the change request.
 
 Currently only tested for bbr backups with the elastic-runtime tile.
 
+Available opts:
+ *on_updates*: performs backup before updates  only
+ *backup_daily*: performs backups before updates and daily

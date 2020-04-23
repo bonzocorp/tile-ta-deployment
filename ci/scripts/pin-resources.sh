@@ -23,6 +23,7 @@ function pin_versions(){
   while read pin; do
     resource_name=$(echo $pin | cut -d':' -f1)
     version_regex=$(echo $pin | cut -d':' -f2 | tr -d '[:space:]')
+    version_id="$(get_version_id $version_regex)"
 
     if [[ -z "$(get_version_id $version_regex)" ]]; then
       fly -t concourse check-resource -r $PIPELINE_NAME/$resource_name -f product_version:$version_regex
